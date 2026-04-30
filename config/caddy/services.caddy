@@ -1,0 +1,4 @@
+https://cal.platanosverdes.com {
+    import cf_tls
+    reverse_proxy cal-bridge:8000
+}
