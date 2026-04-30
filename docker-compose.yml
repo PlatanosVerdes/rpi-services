@@ -31,7 +31,7 @@ services:
   # --- One Pace downloader (run-once, not restart) ---
   # docker compose run --rm one-pace-downloader
   one-pace-downloader:
-    build: ./services/one-pace-downloader
+    build: https://github.com/PlatanosVerdes/one-pace-downloader.git#main
     container_name: one-pace-downloader
     restart: "no"
     profiles: [one-pace]
