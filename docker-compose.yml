@@ -28,7 +28,27 @@ services:
     volumes:
       - ${APP_CONFIG_PATH}/cal-bridge:/data/tokens
 
-  # --- One Pace downloader (run-once, not restart) ---
+  # --- Ofelia scheduler (runs one-pace-downloader daily) ---
+  ofelia:
+    image: mcuadros/ofelia:latest
+    container_name: ofelia
+    restart: unless-stopped
+    profiles: [one-pace, all]
+    command: daemon --docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - media-network
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-run.one-pace-downloader.schedule: "0 3 * * *"
+      ofelia.job-run.one-pace-downloader.image: "rpi-services-one-pace-downloader:latest"
+      ofelia.job-run.one-pace-downloader.network: "media-network"
+      ofelia.job-run.one-pace-downloader.dns: "8.8.8.8"
+      ofelia.job-run.one-pace-downloader.volume: "${DATA_ROOT}/series:/mnt/data/series"
+      ofelia.job-run.one-pace-downloader.command: "--resolution 1080p --output /mnt/data/series --pushgateway http://pushgateway:9091"
+
+  # --- One Pace downloader (run-once manually or via ofelia) ---
   # docker compose run --rm one-pace-downloader
   one-pace-downloader:
     build: https://github.com/PlatanosVerdes/one-pace-downloader.git#main
