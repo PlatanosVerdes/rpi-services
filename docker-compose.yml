@@ -34,9 +34,10 @@ services:
     container_name: ofelia
     restart: unless-stopped
     profiles: [one-pace, all]
-    command: daemon --docker --web-http=:8080
+    command: daemon --docker --config /etc/ofelia/config.ini
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/ofelia/config.ini:/etc/ofelia/config.ini:ro
     networks:
       - media-network
     labels:
