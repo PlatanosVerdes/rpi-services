@@ -47,6 +47,10 @@ services:
       ofelia.job-run.one-pace-downloader.dns: "8.8.8.8"
       ofelia.job-run.one-pace-downloader.volume: "${DATA_ROOT}/series:/mnt/data/series"
       ofelia.job-run.one-pace-downloader.command: "--resolution 1080p --output /mnt/data/series --pushgateway http://pushgateway:9091"
+      # healthcheck: every 5 min (test job to verify Ofelia metrics)
+      ofelia.job-run.healthcheck.schedule: "*/5 * * * *"
+      ofelia.job-run.healthcheck.image: "alpine:latest"
+      ofelia.job-run.healthcheck.command: "echo ok"
 
   # --- One Pace downloader (run-once manually or via ofelia) ---
   # docker compose run --rm one-pace-downloader
