@@ -34,10 +34,10 @@ services:
     container_name: ofelia
     restart: unless-stopped
     profiles: [one-pace, all]
-    command: daemon --docker --config /etc/ofelia/config.ini
+    command: daemon --docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./config/ofelia/config.ini:/etc/ofelia/config.ini:ro
+      - ./config/ofelia/config.ini:/etc/ofelia.conf:ro
     networks:
       - media-network
     labels:
