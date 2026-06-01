@@ -34,7 +34,7 @@ services:
     container_name: ofelia
     restart: unless-stopped
     profiles: [one-pace, all]
-    command: daemon --docker
+    command: daemon --docker --web-http=:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
