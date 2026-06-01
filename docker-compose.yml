@@ -28,26 +28,25 @@ services:
     volumes:
       - ${APP_CONFIG_PATH}/cal-bridge:/data/tokens
 
-  # --- Ofelia scheduler (runs one-pace-downloader daily) ---
+  # --- Chadburn scheduler (runs one-pace-downloader daily) ---
   ofelia:
-    image: mcuadros/ofelia:latest
+    image: premoweb/chadburn:latest
     container_name: ofelia
     restart: unless-stopped
     profiles: [one-pace, all]
-    command: daemon --docker
+    command: daemon --metrics
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./config/ofelia/config.ini:/etc/ofelia.conf:ro
     networks:
       - media-network
     labels:
-      ofelia.enabled: "true"
-      ofelia.job-run.one-pace-downloader.schedule: "0 3 * * *"
-      ofelia.job-run.one-pace-downloader.image: "rpi-services-one-pace-downloader:latest"
-      ofelia.job-run.one-pace-downloader.network: "media-network"
-      ofelia.job-run.one-pace-downloader.dns: "8.8.8.8"
-      ofelia.job-run.one-pace-downloader.volume: "${DATA_ROOT}/series:/mnt/data/series"
-      ofelia.job-run.one-pace-downloader.command: "--resolution 1080p --output /mnt/data/series --pushgateway http://pushgateway:9091 --plex-url http://plex:32400 --plex-token ${PLEX_API_TOKEN} --plex-path /data/series"
+      chadburn.enabled: "true"
+      chadburn.job-run.one-pace-downloader.schedule: "0 3 * * *"
+      chadburn.job-run.one-pace-downloader.image: "rpi-services-one-pace-downloader:latest"
+      chadburn.job-run.one-pace-downloader.network: "media-network"
+      chadburn.job-run.one-pace-downloader.dns: "8.8.8.8"
+      chadburn.job-run.one-pace-downloader.volume: "${DATA_ROOT}/series:/mnt/data/series"
+      chadburn.job-run.one-pace-downloader.command: "--resolution 1080p --output /mnt/data/series --pushgateway http://pushgateway:9091 --plex-url http://plex:32400 --plex-token ${PLEX_API_TOKEN} --plex-path /data/series"
 
   # --- One Pace downloader (run-once manually or via ofelia) ---
   # docker compose run --rm one-pace-downloader
