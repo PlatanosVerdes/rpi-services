@@ -1,8 +1,9 @@
 # Pending tasks
 
-## Schedule the One Pace downloader via a host cron (NOT done yet)
+## Schedule the One Pace downloader via a host cron (DONE)
 
-**Status:** pending. The scheduled download is currently **not running** and must be set up manually.
+**Status:** installed on the host crontab (daily at 03:00). The line below is kept here for
+reference so it can be re-added if the Pi is rebuilt (the host crontab is not tracked in git).
 
 **Background:** the One Pace downloader used to be triggered by a `chadburn` scheduler container
 (named `ofelia`). That never actually worked on this Pi:
@@ -15,17 +16,14 @@ So the download had not run on schedule for weeks. The chadburn/`ofelia` service
 with its Grafana dashboard and Prometheus scrape job) in favor of a plain host cron, consistent with
 how everything else on this Pi is scheduled (deploy, backup, metrics).
 
-**Why it is still pending:** the host crontab is not tracked in git and enabling scheduled downloads
-is a deliberate choice, so it is left as a manual step for the operator rather than auto-installed.
-
-**How to enable it** (`crontab -e` on the Pi):
+**Installed cron line** (`crontab -e` on the Pi):
 
 ```cron
 # Download new One Pace episodes daily at 03:00
 0 3 * * * cd /home/raspi/rpi-services && docker compose run --rm one-pace-downloader >> /home/raspi/rpi-services/one-pace.log 2>&1
 ```
 
-Run once by hand to verify before scheduling:
+Run once by hand to test:
 
 ```bash
 cd ~/rpi-services && docker compose run --rm one-pace-downloader
