@@ -40,6 +40,10 @@ services:
     restart: unless-stopped
     profiles: [one-pace, all]
     command: daemon --metrics
+    # chadburn's image runs as non-root 'appuser' with a baked docker GID (969) that does
+    # not match the host docker group (984), so it can't read the socket. Add the host GID.
+    group_add:
+      - "984"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
