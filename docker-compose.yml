@@ -1,3 +1,8 @@
+# App images are built from their own repos, pinned to a CalVer tag (vYYYY.MM.DD) for
+# reproducible deploys. Each app repo auto-creates that tag on every push to main
+# (.github/workflows/auto-tag.yml). To deploy a new version: bump the #vYYYY.MM.DD ref
+# in the build: line below to the desired tag, then commit.
+
 networks:
   media-network:
     external: true
@@ -5,7 +10,7 @@ networks:
 services:
   # --- Google Calendar Bridge (ESP32 / local API) ---
   cal-bridge:
-    build: https://github.com/PlatanosVerdes/cal-bridge.git#main
+    build: https://github.com/PlatanosVerdes/cal-bridge.git#v2026.07.01
     container_name: cal-bridge
     restart: unless-stopped
     profiles: [cal, all]
@@ -51,7 +56,7 @@ services:
   # --- One Pace downloader (run-once manually or via ofelia) ---
   # docker compose run --rm one-pace-downloader
   one-pace-downloader:
-    build: https://github.com/PlatanosVerdes/one-pace-downloader.git#main
+    build: https://github.com/PlatanosVerdes/one-pace-downloader.git#v2026.07.01
     container_name: one-pace-downloader
     restart: "no"
     profiles: [one-pace]
@@ -80,7 +85,7 @@ services:
 
   # --- Telegram Bot for Academy Offers ---
   pol-academy-offers-bot:
-    build: https://github.com/PlatanosVerdes/PolFerrerAcademyOffers.git#main
+    build: https://github.com/PlatanosVerdes/PolFerrerAcademyOffers.git#v2026.07.01
     container_name: pol-academy-offers-bot
     restart: unless-stopped
     profiles: [bot, all]
