@@ -33,31 +33,11 @@ services:
     volumes:
       - ${APP_CONFIG_PATH}/cal-bridge:/data/tokens
 
-  # --- Chadburn scheduler (runs one-pace-downloader daily) ---
-  ofelia:
-    image: premoweb/chadburn:latest
-    container_name: ofelia
-    restart: unless-stopped
-    profiles: [one-pace, all]
-    command: daemon --metrics
-    # chadburn's image runs as non-root 'appuser' with a baked docker GID (969) that does
-    # not match the host docker group (984), so it can't read the socket. Add the host GID.
-    group_add:
-      - "984"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - media-network
-    labels:
-      chadburn.enabled: "true"
-      chadburn.job-run.one-pace-downloader.schedule: "0 3 * * *"
-      chadburn.job-run.one-pace-downloader.image: "rpi-services-one-pace-downloader:latest"
-      chadburn.job-run.one-pace-downloader.network: "media-network"
-      chadburn.job-run.one-pace-downloader.dns: "8.8.8.8"
-      chadburn.job-run.one-pace-downloader.volume: "${DATA_ROOT}/series:/mnt/data/series"
-      chadburn.job-run.one-pace-downloader.command: "--resolution 1080p --output /mnt/data/series --pushgateway http://pushgateway:9091 --plex-url http://plex:32400 --plex-token ${PLEX_API_TOKEN} --plex-path /data/series"
+  # NOTE: the one-pace-downloader used to be scheduled by a chadburn ("ofelia") container,
+  # but chadburn never worked here (docker-socket GID mismatch + broken label discovery) so
+  # it was removed. Scheduling is now meant to be a host cron. See PENDING.md.
 
-  # --- One Pace downloader (run-once manually or via ofelia) ---
+  # --- One Pace downloader (run on demand or from a host cron) ---
   # docker compose run --rm one-pace-downloader
   one-pace-downloader:
     build: https://github.com/PlatanosVerdes/one-pace-downloader.git#v2026.07.01
