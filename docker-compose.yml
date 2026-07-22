@@ -69,7 +69,7 @@ services:
 
   # --- Telegram Bot for Academy Offers ---
   pol-academy-offers-bot:
-    build: https://github.com/PlatanosVerdes/PolFerrerAcademyOffers.git#v2026.07.01
+    build: https://github.com/PlatanosVerdes/PolFerrerAcademyOffers.git#v2026.07.22
     container_name: pol-academy-offers-bot
     restart: unless-stopped
     profiles: [bot, all]
