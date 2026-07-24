@@ -2,3 +2,24 @@ https://cal.platanosverdes.com {
     import cf_tls
     reverse_proxy cal-bridge:8000
 }
+
+# air-tag — location map. Locked down hard because it exposes where you move:
+#   1. Only reachable inside the tailnet / LAN (everything else gets 403).
+#   2. HTTP basic auth on top (generate the hash with:
+#        docker exec caddy caddy hash-password --plaintext 'yourpassword'
+#      then paste it below, replacing REPLACE_WITH_BCRYPT_HASH).
+# There is no host port published for the container, so Caddy is the only way in.
+https://airtag.platanosverdes.com {
+    import cf_tls
+
+    @tailnet remote_ip 100.64.0.0/10 192.168.0.0/16 10.0.0.0/8 127.0.0.1/8 ::1
+    handle @tailnet {
+        basic_auth {
+            jorge $2b$14$3nM4hQ7pc41HLLvbUNVmsetIGIN0B1rMK2BDnClUWi03Np1yAxTEC
+        }
+        reverse_proxy air-tag:8000
+    }
+    handle {
+        respond "Forbidden" 403
+    }
+}

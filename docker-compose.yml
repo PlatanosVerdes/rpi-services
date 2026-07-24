@@ -67,6 +67,43 @@ services:
       #- "--arc"
       #- "skypiea"
 
+  # --- Anisette server (Apple auth headers for air-tag; self-hosted, no Mac needed) ---
+  # Pin to a digest for reproducibility once you have one:
+  #   docker inspect --format '{{index .RepoDigests 0}}' anisette
+  anisette:
+    image: dadoum/anisette-v3-server:latest
+    container_name: anisette
+    restart: unless-stopped
+    profiles: [airtag, all]
+    networks:
+      - media-network
+    volumes:
+      - ${APP_CONFIG_PATH}/anisette:/home/Alcoholic/.config/anisette-v3/lib/
+
+  # --- AirTag tracker + map (internal only; reached via Caddy, no host port) ---
+  air-tag:
+    build: https://github.com/PlatanosVerdes/air-tag.git#v2026.07.24
+    container_name: air-tag
+    restart: unless-stopped
+    profiles: [airtag, all]
+    depends_on:
+      - anisette
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - media-network
+    environment:
+      APPLE_ID: ${AIRTAG_APPLE_ID}
+      APPLE_PASSWORD: ${AIRTAG_APPLE_PASSWORD}
+      AIRTAG_PRIVATE_KEY: ${AIRTAG_PRIVATE_KEY}
+      ANISETTE_URL: http://anisette:6969
+      POLL_INTERVAL: ${AIRTAG_POLL_INTERVAL:-900}
+      TZ: ${TZ:-Europe/Madrid}
+      DATA_DIR: /data
+    volumes:
+      - ${APP_CONFIG_PATH}/air-tag:/data
+
   # --- Telegram Bot for Academy Offers ---
   pol-academy-offers-bot:
     build: https://github.com/PlatanosVerdes/PolFerrerAcademyOffers.git#v2026.07.22
