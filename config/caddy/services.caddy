@@ -3,23 +3,18 @@ https://cal.platanosverdes.com {
     reverse_proxy cal-bridge:8000
 }
 
-# air-tag — location map. Locked down hard because it exposes where you move:
-#   1. Only reachable inside the tailnet / LAN (everything else gets 403).
-#   2. HTTP basic auth on top (generate the hash with:
-#        docker exec caddy caddy hash-password --plaintext 'yourpassword'
-#      then paste it below, replacing REPLACE_WITH_BCRYPT_HASH).
-# There is no host port published for the container, so Caddy is the only way in.
+# air-tag — location map. Locked down because it exposes where you move:
+#   - Only reachable inside the tailnet: the *.platanosverdes.com names resolve to
+#     the Tailscale IP and nothing is port-forwarded to the internet.
+#   - HTTP basic auth on top (hash generated with: caddy hash-password).
+# NOTE: a remote_ip allowlist does NOT work here — Caddy runs on a Docker bridge
+# network, so external traffic is source-NAT'd to the docker gateway (172.x) and
+# Caddy never sees the real client IP. basic_auth + tailnet-only is the real gate.
 https://airtag.platanosverdes.com {
     import cf_tls
 
-    @tailnet remote_ip 100.64.0.0/10 192.168.0.0/16 10.0.0.0/8 127.0.0.1/8 ::1
-    handle @tailnet {
-        basic_auth {
-            jorge $2b$14$3nM4hQ7pc41HLLvbUNVmsetIGIN0B1rMK2BDnClUWi03Np1yAxTEC
-        }
-        reverse_proxy air-tag:8000
+    basic_auth {
+        jorge $2b$14$3nM4hQ7pc41HLLvbUNVmsetIGIN0B1rMK2BDnClUWi03Np1yAxTEC
     }
-    handle {
-        respond "Forbidden" 403
-    }
+    reverse_proxy air-tag:8000
 }
