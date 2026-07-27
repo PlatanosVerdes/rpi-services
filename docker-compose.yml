@@ -49,6 +49,8 @@ services:
       - 1.1.1.1
     networks:
       - media-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ${DATA_ROOT}/series:/mnt/data/series
     command:
@@ -59,7 +61,7 @@ services:
       - "--pushgateway"
       - "http://pushgateway:9091"
       - "--plex-url"
-      - "http://plex:32400"
+      - "http://host.docker.internal:32400"
       - "--plex-token"
       - "${PLEX_API_TOKEN}"
       - "--plex-path"
