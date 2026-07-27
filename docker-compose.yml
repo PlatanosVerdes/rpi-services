@@ -40,7 +40,7 @@ services:
   # --- One Pace downloader (run on demand or from a host cron) ---
   # docker compose run --rm one-pace-downloader
   one-pace-downloader:
-    build: https://github.com/PlatanosVerdes/one-pace-downloader.git#v2026.07.01
+    build: https://github.com/PlatanosVerdes/one-pace-downloader.git#v2026.07.27
     container_name: one-pace-downloader
     restart: "no"
     profiles: [one-pace]
