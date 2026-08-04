@@ -1,0 +1,14 @@
+# Host crontab fragment for rpi-services — personal jobs only.
+#
+# Merged with rpi-homeserver/scripts/crontab by rpi-homeserver/scripts/install-crontab.sh, which
+# runs on every deploy. Nothing here needs to be known by the generic repo, so add and remove
+# jobs freely: commit and the next deploy installs them.
+#
+# Do NOT edit the live crontab with `crontab -e`, it gets overwritten on the next deploy.
+
+# cal-bridge metrics (MS client secret expiry, etc.), daily at 09:00
+0 9 * * * /home/raspi/rpi-services/scripts/cal-bridge-metrics.sh
+
+# Download new One Pace episodes daily at 03:00
+# COMPOSE_ENV_FILES is required: the image tag lives in versions.env
+0 3 * * * cd /home/raspi/rpi-services && COMPOSE_ENV_FILES=versions.env,.env docker compose run --rm one-pace-downloader >> /home/raspi/rpi-services/one-pace.log 2>&1
