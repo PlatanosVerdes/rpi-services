@@ -1,6 +1,8 @@
 # rpi-services
 
-Personal services running on my Raspberry Pi home server. This is the private counterpart to [rpi-homeserver](https://github.com/PlatanosVerdes/rpi-homeserver), which handles the core infrastructure (Caddy, Pi-hole, monitoring, media stack).
+Personal services running on my Raspberry Pi home server. This is the personal counterpart to [rpi-homeserver](https://github.com/PlatanosVerdes/rpi-homeserver), which handles the core infrastructure (Caddy, Pi-hole, monitoring, media stack) and is meant to be clonable by anyone. Everything specific to me lives here instead, so that repo stays generic.
+
+Both repos are deployed by `rpi-homeserver/scripts/deploy_control.sh` (webhook on push, cron every 30 min as fallback) and follow the same conventions: versions in a committed `versions.env`, no `:latest`, one shared host crontab.
 
 ## Services
 

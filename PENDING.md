@@ -1,6 +1,9 @@
 # Pending tasks
 
-## Schedule the One Pace downloader via a host cron (DONE)
+> Cron jobs for this repo live in `rpi-homeserver/scripts/crontab`, the single source of truth for
+> the host crontab. Do not add a separate one here.
+
+## ✅ Schedule the One Pace downloader via a host cron (DONE)
 
 **Status:** installed on the host crontab (daily at 03:00). The line below is kept here for
 reference so it can be re-added if the Pi is rebuilt (the host crontab is not tracked in git).
