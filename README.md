@@ -30,11 +30,14 @@ cp ~/rpi-services/.env.example ~/rpi-services/.env
 
 ### 2. Link Caddy routes
 
+Point rpi-homeserver at this repo's Caddy config by adding one line to **its** `.env`:
+
 ```bash
-ln -s ~/rpi-services/config/caddy ~/rpi-homeserver/config/caddy/services/rpi-services
+EXT_CADDY_PATH=/home/raspi/rpi-services/config/caddy
 ```
 
-Caddy auto-imports everything under `config/caddy/services/`, so this is enough to add HTTPS routes without touching the main repo.
+Caddy mounts it at `/etc/caddy/ext-services` and auto-imports every `*.caddy` in it, so HTTPS
+routes are added here without touching the main repo. Restart Caddy once after setting it.
 
 ### 3. Run
 
