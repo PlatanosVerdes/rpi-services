@@ -38,7 +38,11 @@ Caddy auto-imports everything under `config/caddy/services/`, so this is enough 
 
 ### 3. Run
 
+App versions live in `versions.env`, so compose needs both env files. `deploy_control.sh` sets this
+automatically; to run compose by hand, export it first or the `${..._VERSION}` refs resolve empty:
+
 ```bash
+export COMPOSE_ENV_FILES=versions.env,.env
 docker compose up -d
 ```
 
@@ -47,6 +51,7 @@ Use `COMPOSE_PROFILES` in `.env` to select which services to start (e.g. `COMPOS
 ### One-off services
 
 ```bash
+export COMPOSE_ENV_FILES=versions.env,.env
 # Download One Pace episodes
 docker compose run --rm one-pace-downloader
 ```

@@ -6,6 +6,8 @@ docker-compose.override.yml
 
 # Environment variables (CRITICAL - contains passwords and API keys)
 *.env
+# ...except versions.env, which holds only image versions/digests (see rpi-homeserver)
+!versions.env
 .env_copy
 .deploy_state
 .bitwarden

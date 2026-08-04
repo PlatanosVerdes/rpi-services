@@ -1,7 +1,7 @@
 # App images are built from their own repos, pinned to a CalVer tag (vYYYY.MM.DD) for
 # reproducible deploys. Each app repo auto-creates that tag on every push to main
-# (.github/workflows/auto-tag.yml). To deploy a new version: bump the #vYYYY.MM.DD ref
-# in the build: line below to the desired tag, then commit.
+# (.github/workflows/auto-tag.yml), and .github/workflows/bump-app-versions.yml here picks
+# it up and bumps versions.env, which is what triggers the deploy. Nothing to do by hand.
 
 networks:
   media-network:
@@ -10,7 +10,7 @@ networks:
 services:
   # --- Google Calendar Bridge (ESP32 / local API) ---
   cal-bridge:
-    build: https://github.com/PlatanosVerdes/cal-bridge.git#v2026.07.01
+    build: https://github.com/PlatanosVerdes/cal-bridge.git#${CAL_BRIDGE_VERSION}
     container_name: cal-bridge
     restart: unless-stopped
     profiles: [cal, all]
@@ -40,7 +40,7 @@ services:
   # --- One Pace downloader (run on demand or from a host cron) ---
   # docker compose run --rm one-pace-downloader
   one-pace-downloader:
-    build: https://github.com/PlatanosVerdes/one-pace-downloader.git#v2026.07.27
+    build: https://github.com/PlatanosVerdes/one-pace-downloader.git#${ONE_PACE_VERSION}
     container_name: one-pace-downloader
     restart: "no"
     profiles: [one-pace]
@@ -73,7 +73,7 @@ services:
   # Pin to a digest for reproducibility once you have one:
   #   docker inspect --format '{{index .RepoDigests 0}}' anisette
   anisette:
-    image: dadoum/anisette-v3-server:latest
+    image: dadoum/anisette-v3-server@${ANISETTE_DIGEST}
     container_name: anisette
     restart: unless-stopped
     profiles: [airtag, all]
@@ -84,7 +84,7 @@ services:
 
   # --- AirTag tracker + map (internal only; reached via Caddy, no host port) ---
   air-tag:
-    build: https://github.com/PlatanosVerdes/air-tag.git#v2026.07.24
+    build: https://github.com/PlatanosVerdes/air-tag.git#${AIR_TAG_VERSION}
     container_name: air-tag
     restart: unless-stopped
     profiles: [airtag, all]
@@ -108,7 +108,7 @@ services:
 
   # --- Telegram Bot for Academy Offers ---
   pol-academy-offers-bot:
-    build: https://github.com/PlatanosVerdes/PolFerrerAcademyOffers.git#v2026.07.22
+    build: https://github.com/PlatanosVerdes/PolFerrerAcademyOffers.git#${POL_BOT_VERSION}
     container_name: pol-academy-offers-bot
     restart: unless-stopped
     profiles: [bot, all]

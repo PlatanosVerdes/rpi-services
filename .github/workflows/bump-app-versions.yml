@@ -1,0 +1,68 @@
+name: Bump app versions
+
+# Each app repo auto-tags every push to main (vYYYY.MM.DD). This picks up the newest tag of
+# each one and bumps versions.env, and that commit is what the Pi's deploy webhook reacts to.
+# Pushes with the built-in GITHUB_TOKEN, so no PAT and no write credentials on the Pi.
+
+on:
+  schedule:
+    - cron: '0,30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bump versions.env to the latest tags
+        run: |
+          set -euo pipefail
+          declare -A REPOS=(
+            [CAL_BRIDGE_VERSION]=cal-bridge
+            [ONE_PACE_VERSION]=one-pace-downloader
+            [AIR_TAG_VERSION]=air-tag
+            [POL_BOT_VERSION]=PolFerrerAcademyOffers
+          )
+          summary=""
+          for key in "${!REPOS[@]}"; do
+            repo="${REPOS[$key]}"
+            latest=$(git ls-remote --tags --refs "https://github.com/${{ github.repository_owner }}/$repo.git" 'v*' \
+              | awk -F/ '{print $NF}' | sort -V | tail -1)
+            if [ -z "$latest" ]; then
+              echo "::warning::$repo has no v* tags, skipping"
+              continue
+            fi
+            current=$(grep "^$key=" versions.env | cut -d= -f2-)
+            if [ "$latest" != "$current" ]; then
+              sed -i "s|^$key=.*|$key=$latest|" versions.env
+              echo "$repo: $current -> $latest"
+              summary="$summary$repo $current -> $latest"$'\n'
+            fi
+          done
+          if [ -z "$summary" ]; then
+            echo "Everything already up to date"
+            exit 0
+          fi
+          {
+            echo "MESSAGE<<EOF"
+            echo "deps: bump app versions"
+            echo
+            printf '%s' "$summary"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+      - name: Commit and push
+        run: |
+          if git diff --quiet -- versions.env; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add versions.env
+          git commit -m "$MESSAGE"
+          git push
