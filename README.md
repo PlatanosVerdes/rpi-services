@@ -2,7 +2,7 @@
 
 Personal services running on my Raspberry Pi home server. This is the personal counterpart to [rpi-homeserver](https://github.com/PlatanosVerdes/rpi-homeserver), which handles the core infrastructure (Caddy, Pi-hole, monitoring, media stack) and is meant to be clonable by anyone. Everything specific to me lives here instead, so that repo stays generic.
 
-Both repos are deployed by `rpi-homeserver/scripts/deploy_control.sh` (webhook on push, cron every 30 min as fallback) and follow the same conventions: versions in a committed `versions.env`, no `:latest`, one shared host crontab.
+Both repos are deployed by `rpi-homeserver/scripts/apply.sh` (webhook on push, cron every 30 min as fallback) and follow the same conventions: versions in a committed `versions.env`, no `:latest`, one shared host crontab.
 
 ## Services
 
@@ -41,7 +41,7 @@ routes are added here without touching the main repo. Restart Caddy once after s
 
 ### 3. Run
 
-App versions live in `versions.env`, so compose needs both env files. `deploy_control.sh` sets this
+App versions live in `versions.env`, so compose needs both env files. `apply.sh` sets this
 automatically; to run compose by hand, export it first or the `${..._VERSION}` refs resolve empty:
 
 ```bash
