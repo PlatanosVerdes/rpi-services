@@ -13,6 +13,7 @@ Both repos are deployed by `rpi-homeserver/scripts/apply.sh` (webhook on push, c
 | `one-pace-downloader` | `one-pace` | One-shot downloader for One Pace episodes |
 | `anisette` | `airtag`, `all` | Self-hosted Apple auth (anisette) server used by air-tag |
 | `air-tag` | `airtag`, `all` | AirTag location tracker + private Leaflet map (see [air-tag repo](https://github.com/PlatanosVerdes/air-tag)) |
+| `laliga-fantasy` | `fantasy`, `all` | LaLiga Fantasy decision panel (see [laliga-fantasy repo](https://github.com/PlatanosVerdes/laliga-fantasy)) |
 
 ## Setup
 
@@ -58,3 +59,21 @@ export COMPOSE_ENV_FILES=versions.env,.env
 # Download One Pace episodes
 docker compose run --rm one-pace-downloader
 ```
+
+## laliga-fantasy
+
+**Sesion.** El login es un OAuth por navegador, que un contenedor no puede hacer. No hace falta
+copiar nada a mano: si no hay sesion, la propia pagina la pide. Abre
+`https://fantasy.platanosverdes.com`, pulsa el enlace de login, y pega la direccion a la que te
+redirija (fallara al abrir `authredirect://…`, eso es lo normal: el codigo esta en la barra).
+Tambien acepta un `tokens.json` pegado tal cual, y lo comprueba contra la API antes de aceptarlo.
+
+A partir de ahi el refresh token rota solo y el fichero se actualiza en su sitio, asi que es cosa
+de una vez. `/healthz` dice cuanta vida le queda a la sesion, que es lo que convierte "se me ha
+muerto el token" en un aviso en vez de en una sorpresa.
+
+**Acceso.** Solo se llega desde el tailnet, y eso es toda la puerta: la pagina puede gastar
+dinero real de la liga, asi que lo que la protege es que nadie mas llegue. Nada se ejecuta sin
+confirmarlo en la pagina, y las instrucciones permanentes solo actuan dentro de los limites que
+se les pongan ahi. Con `--read-only` en el `command` se sirve la pagina y se rechaza cualquier
+operacion, por si algun dia interesa mirar sin poder tocar.

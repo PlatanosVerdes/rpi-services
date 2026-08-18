@@ -18,3 +18,13 @@ https://airtag.platanosverdes.com {
     }
     reverse_proxy air-tag:8000
 }
+
+# laliga-fantasy — panel de decisiones del fantasy. Solo alcanzable dentro del
+# tailnet, que es la unica puerta: la pagina puede lanzar pujas con dinero real, asi
+# que lo que la protege es que nadie mas llega hasta aqui.
+https://fantasy.platanosverdes.com {
+    log
+    import cf_tls
+
+    reverse_proxy laliga-fantasy:8000
+}

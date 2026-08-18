@@ -26,6 +26,7 @@ jobs:
             [ONE_PACE_VERSION]=one-pace-downloader
             [AIR_TAG_VERSION]=air-tag
             [POL_BOT_VERSION]=PolFerrerAcademyOffers
+            [LALIGA_FANTASY_VERSION]=laliga-fantasy
           )
           summary=""
           for key in "${!REPOS[@]}"; do

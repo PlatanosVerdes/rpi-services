@@ -120,3 +120,40 @@ services:
       BOT_TOKEN: ${BOT_POL_ACADEMY_OFFERS_TOKEN}
     volumes:
       - ${APP_CONFIG_PATH}/pol-academy-bot:/app/data
+
+  # --- LaLiga Fantasy: panel de decisiones (mercado, clausulas, rivales) ---
+  # Lee la API oficial de LaLiga Fantasy y futbolfantasy.com, y sirve un panel en
+  # vivo (API JSON + push por SSE). Sin dependencias: la imagen es python-alpine
+  # con el paquete copiado dentro.
+  #
+  # La sesion es lo unico que no se puede regenerar: se importa una vez desde el
+  # navegador (`auth browser` + `auth code`) y se copia tokens.json a este volumen.
+  # A partir de ahi el refresh token la mantiene viva, igual que la app oficial.
+  #
+  # Esta pagina PUEDE gastar dinero real: pujar, vender, aceptar ofertas y pagar
+  # clausulas. Y ejecuta las instrucciones programadas (siempre-en-mercado,
+  # clausulazos) sin preguntar, que es justamente para lo que estan: una clausula se
+  # libera cuando se libera. Las instrucciones viven en data/policies.json y solo las
+  # crea el usuario.
+  #   --read-only  apaga toda operacion
+  #   --no-auto    deja los botones pero suspende las instrucciones programadas
+  # Por eso el basic_auth de services.caddy no es opcional.
+  laliga-fantasy:
+    build: https://github.com/PlatanosVerdes/laliga-fantasy.git#${LALIGA_FANTASY_VERSION}
+    container_name: laliga-fantasy
+    restart: unless-stopped
+    profiles: [fantasy, all]
+    mem_limit: 320m
+    memswap_limit: 320m
+    # Writes are on: nothing moves without confirming it in the page, and the standing
+    # instructions only fire within the limits set there.
+    command: ["serve", "--port", "8000", "--interval", "120", "--deep"]
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      # JSON por stdout: Vector ya recoge los logs de cada contenedor.
+      FANTASY_LOG_JSON: "1"
+    volumes:
+      # Sesion, cache, favoritos e informe. La sesion debe persistir.
+      - ${APP_CONFIG_PATH}/laliga-fantasy:/data
+    networks:
+      - media-network
