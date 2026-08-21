@@ -139,7 +139,11 @@ services:
   #   --no-auto    deja los botones pero suspende las instrucciones programadas
   # Por eso el basic_auth de services.caddy no es opcional.
   laliga-fantasy:
-    build: https://github.com/PlatanosVerdes/laliga-fantasy.git#${LALIGA_FANTASY_VERSION}
+    build:
+      context: https://github.com/PlatanosVerdes/laliga-fantasy.git#${LALIGA_FANTASY_VERSION}
+      # The tag reaches the page header, so what is deployed is readable without a shell.
+      args:
+        VERSION: ${LALIGA_FANTASY_VERSION}
     container_name: laliga-fantasy
     restart: unless-stopped
     profiles: [fantasy, all]
