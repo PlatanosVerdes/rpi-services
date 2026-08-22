@@ -10,7 +10,7 @@ Both repos are deployed by `rpi-homeserver/scripts/apply.sh` (webhook on push, c
 | :--- | :--- | :--- |
 | `cal-bridge` | `cal`, `all` | Google Calendar + Microsoft API bridge for an ESP32 display |
 | `pol-academy-offers-bot` | `bot`, `all` | Telegram bot for Pol Ferrer Academy offers |
-| `one-pace-downloader` | `one-pace` | One-shot downloader for One Pace episodes |
+| `one-pace-downloader` | `one-pace` | One-shot downloader for One Pace episodes (see [one-pace-downloader repo](https://github.com/PlatanosVerdes/one-pace-downloader)) |
 | `anisette` | `airtag`, `all` | Self-hosted Apple auth (anisette) server used by air-tag |
 | `air-tag` | `airtag`, `all` | AirTag location tracker + private Leaflet map (see [air-tag repo](https://github.com/PlatanosVerdes/air-tag)) |
 | `laliga-fantasy` | `fantasy`, `all` | LaLiga Fantasy decision panel (see [laliga-fantasy repo](https://github.com/PlatanosVerdes/laliga-fantasy)) |
