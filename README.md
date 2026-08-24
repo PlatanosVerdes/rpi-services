@@ -4,6 +4,12 @@ Personal services running on my Raspberry Pi home server. This is the personal c
 
 Both repos are deployed by `rpi-homeserver/scripts/apply.sh` (webhook on push, cron every 30 min as fallback) and follow the same conventions: versions in a committed `versions.env`, no `:latest`, one shared host crontab.
 
+Monitoring is one label away: a container carrying `prometheus.probe: "http://<name>:<port>/<path>"`
+is probed every 15s by the blackbox exporter over there, and shows up in the Service probes
+dashboard and in the "Service not answering" alert. Nothing to add on the rpi-homeserver side. A
+service that serves no HTTP (the bot, the one-off downloader) has no label: for those, liveness is
+the container running.
+
 ## Services
 
 | Service | Profile | Description |

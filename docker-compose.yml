@@ -12,6 +12,8 @@ services:
   cal-bridge:
     build: https://github.com/PlatanosVerdes/cal-bridge.git#${CAL_BRIDGE_VERSION}
     container_name: cal-bridge
+    labels:
+      prometheus.probe: "http://cal-bridge:8000/health"
     restart: unless-stopped
     profiles: [cal, all]
     dns:
@@ -75,6 +77,8 @@ services:
   anisette:
     image: dadoum/anisette-v3-server@${ANISETTE_DIGEST}
     container_name: anisette
+    labels:
+      prometheus.probe: "http://anisette:6969/"
     restart: unless-stopped
     profiles: [airtag, all]
     networks:
@@ -86,6 +90,8 @@ services:
   air-tag:
     build: https://github.com/PlatanosVerdes/air-tag.git#${AIR_TAG_VERSION}
     container_name: air-tag
+    labels:
+      prometheus.probe: "http://air-tag:8000/"
     restart: unless-stopped
     profiles: [airtag, all]
     depends_on:
@@ -145,6 +151,8 @@ services:
       args:
         VERSION: ${LALIGA_FANTASY_VERSION}
     container_name: laliga-fantasy
+    labels:
+      prometheus.probe: "http://laliga-fantasy:8000/healthz"
     restart: unless-stopped
     profiles: [fantasy, all]
     mem_limit: 320m
