@@ -169,3 +169,39 @@ services:
       - ${APP_CONFIG_PATH}/laliga-fantasy:/data
     networks:
       - media-network
+
+  # --- Wallapop: reactivar los anuncios caducados una vez al dia ---
+  # Lee el catalogo por la API privada de la web y pulsa "Reactivar" en todo lo
+  # que aparece caducado, con pausas aleatorias entre anuncios.
+  #
+  # La sesion es lo unico que no se puede regenerar: el access token dura cinco
+  # minutos y se acuña a partir de la cookie de NextAuth del navegador, que hay
+  # que importar una vez:
+  #   docker exec wallapop-reactivator wallapop session import --cookie '<valor>'
+  # La cookie se renueva en cada lectura, asi que una pasada diaria la mantiene
+  # viva. Cuando por fin caduque, /healthz responde 503 y salta la alerta.
+  wallapop-reactivator:
+    build:
+      context: https://github.com/PlatanosVerdes/wallapop-reactivator.git#${WALLAPOP_VERSION}
+      args:
+        VERSION: ${WALLAPOP_VERSION}
+    container_name: wallapop-reactivator
+    labels:
+      prometheus.probe: "http://wallapop-reactivator:8000/healthz"
+    restart: unless-stopped
+    profiles: [wallapop, all]
+    mem_limit: 64m
+    memswap_limit: 64m
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - media-network
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      WALLA_TELEGRAM_TOKEN: ${WALLA_TELEGRAM_TOKEN:-}
+      WALLA_TELEGRAM_CHAT: ${WALLA_TELEGRAM_CHAT:-}
+    volumes:
+      # La sesion se importa a mano y se renueva sola aqui dentro: tiene que persistir.
+      - ${APP_CONFIG_PATH}/wallapop-reactivator:/data
+

@@ -27,6 +27,7 @@ jobs:
             [AIR_TAG_VERSION]=air-tag
             [POL_BOT_VERSION]=PolFerrerAcademyOffers
             [LALIGA_FANTASY_VERSION]=laliga-fantasy
+            [WALLAPOP_VERSION]=wallapop-reactivator
           )
           summary=""
           for key in "${!REPOS[@]}"; do
