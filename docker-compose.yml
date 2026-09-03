@@ -191,7 +191,8 @@ services:
       - media-network
     environment:
       TZ: ${TZ:-Europe/Madrid}
-      WALLA_TELEGRAM_TOKEN: ${WALLA_TELEGRAM_TOKEN:-}
+      # Same bot as pol-academy-offers-bot: one less token to keep alive.
+      WALLA_TELEGRAM_TOKEN: ${BOT_POL_ACADEMY_OFFERS_TOKEN:-}
       WALLA_TELEGRAM_CHAT: ${WALLA_TELEGRAM_CHAT:-}
     volumes:
       # The session lives here, so it must persist.
