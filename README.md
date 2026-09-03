@@ -20,6 +20,7 @@ the container running.
 | `anisette` | `airtag`, `all` | Self-hosted Apple auth (anisette) server used by air-tag |
 | `air-tag` | `airtag`, `all` | AirTag location tracker + private Leaflet map (see [air-tag repo](https://github.com/PlatanosVerdes/air-tag)) |
 | `laliga-fantasy` | `fantasy`, `all` | LaLiga Fantasy decision panel (see [laliga-fantasy repo](https://github.com/PlatanosVerdes/laliga-fantasy)) |
+| `wallapop-reactivator` | `wallapop`, `all` | Reactivates my expired Wallapop listings daily (see [wallapop-reactivator repo](https://github.com/PlatanosVerdes/wallapop-reactivator)) |
 
 ## Setup
 

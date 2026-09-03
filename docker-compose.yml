@@ -169,3 +169,31 @@ services:
       - ${APP_CONFIG_PATH}/laliga-fantasy:/data
     networks:
       - media-network
+
+  # --- Wallapop: reactivate expired listings daily ---
+  # The session is imported by hand once and renews itself in place; see the repo README.
+  wallapop-reactivator:
+    build:
+      context: https://github.com/PlatanosVerdes/wallapop-reactivator.git#${WALLAPOP_VERSION}
+      args:
+        VERSION: ${WALLAPOP_VERSION}
+    container_name: wallapop-reactivator
+    labels:
+      prometheus.probe: "http://wallapop-reactivator:8000/healthz"
+    restart: unless-stopped
+    profiles: [wallapop, all]
+    mem_limit: 64m
+    memswap_limit: 64m
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - media-network
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      # It sends no messages: it reports state and the alert rules decide.
+      WALLA_PUSHGATEWAY: http://pushgateway:9091
+    volumes:
+      # The session lives here, so it must persist.
+      - ${APP_CONFIG_PATH}/wallapop-reactivator:/data
+
