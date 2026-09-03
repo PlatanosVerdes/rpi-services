@@ -191,8 +191,8 @@ services:
       - media-network
     environment:
       TZ: ${TZ:-Europe/Madrid}
-      WALLA_TELEGRAM_TOKEN: ${WALLA_TELEGRAM_TOKEN:-}
-      WALLA_TELEGRAM_CHAT: ${WALLA_TELEGRAM_CHAT:-}
+      # It sends no messages: it reports state and the alert rules decide.
+      WALLA_PUSHGATEWAY: http://pushgateway:9091
     volumes:
       # The session lives here, so it must persist.
       - ${APP_CONFIG_PATH}/wallapop-reactivator:/data
