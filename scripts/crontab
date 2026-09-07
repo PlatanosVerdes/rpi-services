@@ -10,5 +10,6 @@
 0 9 * * * /home/raspi/rpi-services/scripts/cal-bridge-metrics.sh
 
 # Download new One Pace episodes daily at 03:00
-# COMPOSE_ENV_FILES is required: the image tag lives in versions.env
-0 3 * * * cd /home/raspi/rpi-services && COMPOSE_ENV_FILES=versions.env,.env docker compose run --rm one-pace-downloader >> /home/raspi/rpi-services/one-pace.log 2>&1
+# COMPOSE_ENV_FILES is required: the image tag lives in versions.env. --build is not
+# redundant: the `one-pace` profile keeps the deploy from ever building this one.
+0 3 * * * cd /home/raspi/rpi-services && COMPOSE_ENV_FILES=versions.env,.env docker compose run --build --rm one-pace-downloader >> /home/raspi/rpi-services/one-pace.log 2>&1
