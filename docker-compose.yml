@@ -170,20 +170,21 @@ services:
     networks:
       - media-network
 
-  # --- Wallapop: reactivate expired listings daily ---
+  # --- Wallapop: reactivate expired listings daily and watch the saved searches ---
   # The session is imported by hand once and renews itself in place; see the repo README.
-  wallapop-reactivator:
+  wallapop-manager:
     build:
-      context: https://github.com/PlatanosVerdes/wallapop-reactivator.git#${WALLAPOP_VERSION}
+      context: https://github.com/PlatanosVerdes/wallapop-manager.git#${WALLAPOP_VERSION}
       args:
         VERSION: ${WALLAPOP_VERSION}
-    container_name: wallapop-reactivator
+    container_name: wallapop-manager
     labels:
-      prometheus.probe: "http://wallapop-reactivator:8000/healthz"
+      prometheus.probe: "http://wallapop-manager:8000/healthz"
     restart: unless-stopped
     profiles: [wallapop, all]
-    mem_limit: 64m
-    memswap_limit: 64m
+    # Higher than the 64m it used to need: hashing a thumbnail decodes it first.
+    mem_limit: 128m
+    memswap_limit: 128m
     dns:
       - 8.8.8.8
       - 1.1.1.1
@@ -191,9 +192,12 @@ services:
       - media-network
     environment:
       TZ: ${TZ:-Europe/Madrid}
-      # It sends no messages: it reports state and the alert rules decide.
+      # State is reported as metrics and the alert rules decide. Telegram carries one
+      # thing only: a listing that has just appeared in a watched search.
       WALLA_PUSHGATEWAY: http://pushgateway:9091
+      WALLA_TELEGRAM_TOKEN: ${WALLA_TELEGRAM_TOKEN}
+      WALLA_TELEGRAM_CHAT: ${WALLA_TELEGRAM_CHAT}
     volumes:
-      # The session lives here, so it must persist.
-      - ${APP_CONFIG_PATH}/wallapop-reactivator:/data
+      # The session lives here, and so does what the watcher has already seen.
+      - ${APP_CONFIG_PATH}/wallapop-manager:/data
 
