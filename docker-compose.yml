@@ -1,7 +1,4 @@
-# App images are built in CI, never on the Pi: each app repo tags every push to main and
-# publishes ghcr.io/platanosverdes/<repo>:<tag> (PlatanosVerdes/workflows), and
-# .github/workflows/bump-app-versions.yml here pins the new tag in versions.env, which is what
-# triggers the deploy. Nothing to do by hand.
+# App images come from GHCR, pinned in versions.env by bump-app-versions.yml.
 
 networks:
   media-network:
