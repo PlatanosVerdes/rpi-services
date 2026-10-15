@@ -18,7 +18,10 @@ jobs:
   bump:
     runs-on: ubuntu-latest
     steps:
+      # A queued run would otherwise check out main as it was when it was dispatched.
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Bump versions.env to the latest tags
         run: |
@@ -75,4 +78,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add versions.env
           git commit -m "$MESSAGE"
+          git pull --rebase --quiet origin main
           git push
