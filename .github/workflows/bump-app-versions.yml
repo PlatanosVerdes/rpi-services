@@ -1,12 +1,17 @@
 name: Bump app versions
 
 # Pins the newest published image of each app in versions.env; that commit triggers the deploy.
-# Pushes with the built-in GITHUB_TOKEN, so no PAT and no write credentials on the Pi.
+# Each app's release sends "app-released" as soon as its image is on GHCR.
 
 on:
-  schedule:
-    - cron: '0,30 * * * *'
+  repository_dispatch:
+    types: [app-released]
   workflow_dispatch:
+
+# Two apps released together would both push versions.env.
+concurrency:
+  group: bump-app-versions
+  cancel-in-progress: false
 
 permissions:
   contents: write
