@@ -1,7 +1,6 @@
 name: Bump app versions
 
-# Each app repo auto-tags every push to main (vYYYY.MM.DD). This picks up the newest tag of
-# each one and bumps versions.env, and that commit is what the Pi's deploy webhook reacts to.
+# Pins the newest published image of each app in versions.env; that commit triggers the deploy.
 # Pushes with the built-in GITHUB_TOKEN, so no PAT and no write credentials on the Pi.
 
 on:
@@ -36,6 +35,12 @@ jobs:
               | awk -F/ '{print $NF}' | sort -V | tail -1)
             if [ -z "$latest" ]; then
               echo "::warning::$repo has no v* tags, skipping"
+              continue
+            fi
+            # The tag exists a couple of minutes before its image.
+            image="ghcr.io/${{ github.repository_owner }}/$repo:$latest"
+            if ! docker manifest inspect "${image,,}" >/dev/null 2>&1; then
+              echo "::notice::$repo $latest has no published image yet, skipping"
               continue
             fi
             current=$(grep "^$key=" versions.env | cut -d= -f2-)

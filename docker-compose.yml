@@ -1,7 +1,4 @@
-# App images are built from their own repos, pinned to a CalVer tag (vYYYY.MM.DD) for
-# reproducible deploys. Each app repo auto-creates that tag on every push to main
-# (.github/workflows/auto-tag.yml), and .github/workflows/bump-app-versions.yml here picks
-# it up and bumps versions.env, which is what triggers the deploy. Nothing to do by hand.
+# App images come from GHCR, pinned in versions.env by bump-app-versions.yml.
 
 networks:
   media-network:
@@ -10,7 +7,7 @@ networks:
 services:
   # --- Google Calendar Bridge (ESP32 / local API) ---
   cal-bridge:
-    build: https://github.com/PlatanosVerdes/cal-bridge.git#${CAL_BRIDGE_VERSION}
+    image: ghcr.io/platanosverdes/cal-bridge:${CAL_BRIDGE_VERSION}
     container_name: cal-bridge
     labels:
       prometheus.probe: "http://cal-bridge:8000/health"
@@ -42,7 +39,7 @@ services:
   # --- One Pace downloader (run on demand or from a host cron) ---
   # docker compose run --rm one-pace-downloader
   one-pace-downloader:
-    build: https://github.com/PlatanosVerdes/one-pace-downloader.git#${ONE_PACE_VERSION}
+    image: ghcr.io/platanosverdes/one-pace-downloader:${ONE_PACE_VERSION}
     container_name: one-pace-downloader
     restart: "no"
     profiles: [one-pace]
@@ -88,7 +85,7 @@ services:
 
   # --- AirTag tracker + map (internal only; reached via Caddy, no host port) ---
   air-tag:
-    build: https://github.com/PlatanosVerdes/air-tag.git#${AIR_TAG_VERSION}
+    image: ghcr.io/platanosverdes/air-tag:${AIR_TAG_VERSION}
     container_name: air-tag
     labels:
       prometheus.probe: "http://air-tag:8000/"
@@ -114,7 +111,7 @@ services:
 
   # --- Telegram Bot for Academy Offers ---
   pol-academy-offers-bot:
-    build: https://github.com/PlatanosVerdes/PolFerrerAcademyOffers.git#${POL_BOT_VERSION}
+    image: ghcr.io/platanosverdes/polferreracademyoffers:${POL_BOT_VERSION}
     container_name: pol-academy-offers-bot
     restart: unless-stopped
     profiles: [bot, all]
@@ -145,11 +142,7 @@ services:
   #   --no-auto    deja los botones pero suspende las instrucciones programadas
   # Por eso el basic_auth de services.caddy no es opcional.
   laliga-fantasy:
-    build:
-      context: https://github.com/PlatanosVerdes/laliga-fantasy.git#${LALIGA_FANTASY_VERSION}
-      # The tag reaches the page header, so what is deployed is readable without a shell.
-      args:
-        VERSION: ${LALIGA_FANTASY_VERSION}
+    image: ghcr.io/platanosverdes/laliga-fantasy:${LALIGA_FANTASY_VERSION}
     container_name: laliga-fantasy
     labels:
       prometheus.probe: "http://laliga-fantasy:8000/healthz"
@@ -173,10 +166,7 @@ services:
   # --- Wallapop: reactivate expired listings daily and watch the saved searches ---
   # The session is imported by hand once and renews itself in place; see the repo README.
   wallapop-manager:
-    build:
-      context: https://github.com/PlatanosVerdes/wallapop-manager.git#${WALLAPOP_VERSION}
-      args:
-        VERSION: ${WALLAPOP_VERSION}
+    image: ghcr.io/platanosverdes/wallapop-manager:${WALLAPOP_VERSION}
     container_name: wallapop-manager
     labels:
       prometheus.probe: "http://wallapop-manager:8000/healthz"
