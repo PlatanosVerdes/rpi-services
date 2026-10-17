@@ -20,7 +20,8 @@ the container running.
 | `anisette` | `airtag`, `all` | Self-hosted Apple auth (anisette) server used by air-tag |
 | `air-tag` | `airtag`, `all` | AirTag location tracker + private Leaflet map (see [air-tag repo](https://github.com/PlatanosVerdes/air-tag)) |
 | `laliga-fantasy` | `fantasy`, `all` | LaLiga Fantasy decision panel (see [laliga-fantasy repo](https://github.com/PlatanosVerdes/laliga-fantasy)) |
-| `wallapop-manager` | `wallapop`, `all` | Reactivates my expired Wallapop listings daily and announces what is new in my saved searches (see [wallapop-manager repo](https://github.com/PlatanosVerdes/wallapop-manager)) |
+| `wallabot` | `wallapop`, `all` | Public Telegram bot that announces what is new in each chat's Wallapop searches (see [wallabot repo](https://github.com/PlatanosVerdes/wallabot)) |
+| `wallapop-catalogue` | `wallapop`, `all` | Reactivates my expired Wallapop listings daily, with commands in @PlatanosServicesBot (see [wallapop-catalogue repo](https://github.com/PlatanosVerdes/wallapop-catalogue)) |
 
 ## Setup
 
