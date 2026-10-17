@@ -1,12 +1,17 @@
-name: Bump app versions
+name: Deploy app
 
-# Pins the newest published image of each app in versions.env; that commit triggers the deploy.
-# Each app's release runs it as soon as its image is on GHCR.
+# Each app's release runs this with its own tag once the image is on GHCR; the commit triggers the deploy.
 
 on:
   workflow_dispatch:
+    inputs:
+      app:
+        description: App repo, e.g. laliga-fantasy
+        required: true
+      tag:
+        description: Published tag, e.g. v2026.10.17.1
+        required: true
 
-# Two apps released together would both push versions.env.
 concurrency:
   group: bump-app-versions
   cancel-in-progress: false
@@ -15,68 +20,36 @@ permissions:
   contents: write
 
 jobs:
-  bump:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      # A queued run would otherwise check out main as it was when it was dispatched.
       - uses: actions/checkout@v4
         with:
           ref: main
 
-      - name: Bump versions.env to the latest tags
+      - name: Pin the tag in versions.env
+        env:
+          APP: ${{ inputs.app }}
+          TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
-          declare -A REPOS=(
-            [CAL_BRIDGE_VERSION]=cal-bridge
-            [ONE_PACE_VERSION]=one-pace-downloader
-            [AIR_TAG_VERSION]=air-tag
-            [POL_BOT_VERSION]=PolFerrerAcademyOffers
-            [LALIGA_FANTASY_VERSION]=laliga-fantasy
-            [WALLAPOP_VERSION]=wallapop-manager
-          )
-          summary=""
-          for key in "${!REPOS[@]}"; do
-            repo="${REPOS[$key]}"
-            latest=$(git ls-remote --tags --refs "https://github.com/${{ github.repository_owner }}/$repo.git" 'v*' \
-              | awk -F/ '{print $NF}' | sort -V | tail -1)
-            if [ -z "$latest" ]; then
-              echo "::warning::$repo has no v* tags, skipping"
-              continue
-            fi
-            # The tag exists a couple of minutes before its image.
-            image="ghcr.io/${{ github.repository_owner }}/$repo:$latest"
-            if ! docker manifest inspect "${image,,}" >/dev/null 2>&1; then
-              echo "::notice::$repo $latest has no published image yet, skipping"
-              continue
-            fi
-            current=$(grep "^$key=" versions.env | cut -d= -f2-)
-            if [ "$latest" != "$current" ]; then
-              sed -i "s|^$key=.*|$key=$latest|" versions.env
-              echo "$repo: $current -> $latest"
-              summary="$summary$repo $current -> $latest"$'\n'
-            fi
-          done
-          if [ -z "$summary" ]; then
-            echo "Everything already up to date"
-            exit 0
-          fi
-          {
-            echo "MESSAGE<<EOF"
-            echo "deps: bump app versions"
-            echo
-            printf '%s' "$summary"
-            echo "EOF"
-          } >> "$GITHUB_ENV"
+          # The deploy token can start this with any input, so nothing unchecked reaches the shell.
+          [[ "$APP" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::bad app: $APP"; exit 1; }
+          [[ "$TAG" =~ ^v[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$ ]] || { echo "::error::bad tag: $TAG"; exit 1; }
 
-      - name: Commit and push
-        run: |
+          image="ghcr.io/platanosverdes/${APP,,}"
+          var=$(perl -ne 'BEGIN{$i=shift} print "$1\n" if /image: \Q$i\E:\$\{([A-Z0-9_]+)\}/' "$image" docker-compose.yml)
+          [[ -n "$var" ]] || { echo "::error::$image is not in docker-compose.yml"; exit 1; }
+          docker manifest inspect "$image:$TAG" >/dev/null ||
+            { echo "::error::$image:$TAG is not published"; exit 1; }
+
+          sed -i "s|^$var=.*|$var=$TAG|" versions.env
           if git diff --quiet -- versions.env; then
-            echo "Nothing to commit"
+            echo "$APP is already on $TAG"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add versions.env
-          git commit -m "$MESSAGE"
+          git commit -qm "Deploy $APP $TAG" -- versions.env
           git pull --rebase --quiet origin main
           git push
