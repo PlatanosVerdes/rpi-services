@@ -163,16 +163,15 @@ services:
     networks:
       - media-network
 
-  # --- Wallapop: reactivate expired listings daily and watch the saved searches ---
-  # The session is imported by hand once and renews itself in place; see the repo README.
-  wallapop-manager:
-    image: ghcr.io/platanosverdes/wallapop-manager:${WALLAPOP_VERSION}
-    container_name: wallapop-manager
+  # --- Wallabot: the public bot that watches Wallapop searches ---
+  wallabot:
+    image: ghcr.io/platanosverdes/wallabot:${WALLABOT_VERSION}
+    container_name: wallabot
     labels:
-      prometheus.probe: "http://wallapop-manager:8000/healthz"
+      prometheus.probe: "http://wallabot:8000/healthz"
     restart: unless-stopped
     profiles: [wallapop, all]
-    # Higher than the 64m it used to need: hashing a thumbnail decodes it first.
+    # Hashing a thumbnail decodes it first.
     mem_limit: 128m
     memswap_limit: 128m
     dns:
@@ -182,12 +181,39 @@ services:
       - media-network
     environment:
       TZ: ${TZ:-Europe/Madrid}
-      # State is reported as metrics and the alert rules decide. Telegram carries one
-      # thing only: a listing that has just appeared in a watched search.
       WALLA_PUSHGATEWAY: http://pushgateway:9091
+      # Its own bot, public: Telegram carries the new listings of each chat's searches.
       WALLA_TELEGRAM_TOKEN: ${WALLA_TELEGRAM_TOKEN}
       WALLA_TELEGRAM_CHAT: ${WALLA_TELEGRAM_CHAT}
     volumes:
-      # The session lives here, and so does what the watcher has already seen.
-      - ${APP_CONFIG_PATH}/wallapop-manager:/data
+      # The chats, their searches and what each has already been told.
+      - ${APP_CONFIG_PATH}/wallabot:/data
+
+  # --- Wallapop catalogue: reactivate my expired listings daily ---
+  # The session is imported by hand once and renews itself in place; see the repo README.
+  wallapop-catalogue:
+    image: ghcr.io/platanosverdes/wallapop-catalogue:${WALLAPOP_CATALOGUE_VERSION}
+    container_name: wallapop-catalogue
+    labels:
+      prometheus.probe: "http://wallapop-catalogue:8000/healthz"
+    restart: unless-stopped
+    profiles: [wallapop, all]
+    mem_limit: 64m
+    memswap_limit: 64m
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    networks:
+      - media-network
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      # State is reported as metrics and the alert rules decide.
+      WALLA_PUSHGATEWAY: http://pushgateway:9091
+      # @PlatanosServicesBot: this is the only service reading its updates, and it answers
+      # the owner's chat alone (/wallapop_estado, /wallapop_reactivar).
+      WALLA_TELEGRAM_TOKEN: ${TELEGRAM_BOT_SERVICES}
+      WALLA_TELEGRAM_CHAT: ${WALLA_TELEGRAM_CHAT}
+    volumes:
+      # The session and the last pass.
+      - ${APP_CONFIG_PATH}/wallapop-catalogue:/data
 
