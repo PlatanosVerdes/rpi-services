@@ -10,10 +10,9 @@ dashboard and in the "Service not answering" alert. Nothing to add on the rpi-ho
 service that serves no HTTP (the bot, the one-off downloader) has no label: for those, liveness is
 the container running.
 
-Bots are one label away from [muninn](https://github.com/PlatanosVerdes/muninn) too: a bot that serves
-its `/bot-stats` document (who uses it, its traffic, what it turned away) on an unpublished port and
-carries `muninn.stats: "http://<name>:<port>/bot-stats"` shows up on `muninn.platanosverdes.com`. It
-joins rpi-homeserver's internal `muninn` network to be reached; torre, wallabot and the Pol bot do.
+A bot that exposes its stats at `/bot-stats` on an unpublished port, carries
+`muninn.stats: "http://<name>:<port>/bot-stats"` and joins the internal `muninn` network shows up on
+[muninn](https://github.com/PlatanosVerdes/muninn).
 
 ## Services
 
