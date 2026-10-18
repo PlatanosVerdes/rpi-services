@@ -17,7 +17,7 @@ the container running.
 | `pol-academy-offers-bot` | `bot`, `all` | Telegram bot for Pol Ferrer Academy offers |
 | `one-pace-downloader` | `one-pace` | One-shot downloader for One Pace episodes (see [one-pace-downloader repo](https://github.com/PlatanosVerdes/one-pace-downloader)) |
 | `laliga-fantasy` | `fantasy`, `all` | LaLiga Fantasy decision panel (see [laliga-fantasy repo](https://github.com/PlatanosVerdes/laliga-fantasy)) |
-| `wallabot` | `wallapop`, `all` | Public Telegram bot that announces what is new in each chat's Wallapop searches (see [wallabot repo](https://github.com/PlatanosVerdes/wallabot)) |
+| `wallabot` | `wallapop`, `all` | Public Telegram bot, [@WuallaBot](https://t.me/WuallaBot), that announces what is new in each chat's Wallapop searches (see [wallabot repo](https://github.com/PlatanosVerdes/wallabot)) |
 | `wallapop-catalogue` | `wallapop`, `all` | Reactivates my expired Wallapop listings daily, with commands in @PlatanosServicesBot (see [wallapop-catalogue repo](https://github.com/PlatanosVerdes/wallapop-catalogue)) |
 | `torre` | `torre`, `all` | AENA departures and arrivals on the phone, with alerts through @TorreFlightsBot. **Public**, through the Cloudflare Tunnel, on a network of its own (see [torre repo](https://github.com/PlatanosVerdes/torre)) |
 
