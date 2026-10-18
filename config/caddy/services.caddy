@@ -28,3 +28,12 @@ https://fantasy.platanosverdes.com {
 
     reverse_proxy laliga-fantasy:8000
 }
+
+# torre — AENA flight board. Tailnet only, like every route here; the only thing it keeps is
+# the list of followed flights.
+https://torre.platanosverdes.com {
+    log
+    import cf_tls
+
+    reverse_proxy torre:8000
+}

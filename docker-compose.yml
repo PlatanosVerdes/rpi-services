@@ -217,3 +217,25 @@ services:
       # The session and the last pass.
       - ${APP_CONFIG_PATH}/wallapop-catalogue:/data
 
+
+  # --- torre: AENA's flight board on the phone, and alerts for followed flights ---
+  torre:
+    image: ghcr.io/platanosverdes/torre:${TORRE_VERSION}
+    container_name: torre
+    labels:
+      prometheus.probe: "http://torre:8000/healthz"
+    restart: unless-stopped
+    profiles: [torre, all]
+    # Two-week boards of BCN and MAD held at once peaked at 107 MiB.
+    mem_limit: 192m
+    memswap_limit: 192m
+    networks:
+      - media-network
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      # @PlatanosServicesBot, send-only: wallapop-catalogue is its one reader of updates.
+      TORRE_TELEGRAM_TOKEN: ${TELEGRAM_BOT_SERVICES}
+      TORRE_TELEGRAM_CHAT: ${WALLA_TELEGRAM_CHAT}
+    volumes:
+      # The followed flights.
+      - ${APP_CONFIG_PATH}/torre:/data
