@@ -48,6 +48,9 @@ services:
   pol-academy-offers-bot:
     image: ghcr.io/platanosverdes/polferreracademyoffers:${POL_BOT_VERSION}
     container_name: pol-academy-offers-bot
+    labels:
+      # On the host network, so it declares the host ports it binds (rpi-homeserver's CI checks).
+      host.ports: "none"
     restart: unless-stopped
     profiles: [bot, all]
     dns:
