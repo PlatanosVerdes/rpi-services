@@ -8,33 +8,6 @@ networks:
     name: torre
 
 services:
-  # --- Google Calendar Bridge (ESP32 / local API) ---
-  cal-bridge:
-    image: ghcr.io/platanosverdes/cal-bridge:${CAL_BRIDGE_VERSION}
-    container_name: cal-bridge
-    labels:
-      prometheus.probe: "http://cal-bridge:8000/health"
-    restart: unless-stopped
-    profiles: [cal, all]
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
-    networks:
-      - media-network
-    ports:
-      - "8091:8000"
-    environment:
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      CAL_API_KEY: ${CAL_API_KEY}
-      CAL_BASE_URL: ${CAL_BASE_URL:-https://cal.platanosverdes.com}
-      MS_CLIENT_ID: ${MS_CLIENT_ID:-}
-      MS_CLIENT_SECRET: ${MS_CLIENT_SECRET:-}
-      MS_SECRET_CREATES: ${MS_SECRET_CREATES:-}
-      MS_SECRET_DAYS_DURATION: ${MS_SECRET_DAYS_DURATION:-}
-    volumes:
-      - ${APP_CONFIG_PATH}/cal-bridge:/data/tokens
-
   # NOTE: the one-pace-downloader used to be scheduled by a chadburn ("ofelia") container,
   # but chadburn never worked here (docker-socket GID mismatch + broken label discovery) so
   # it was removed. Scheduling is now meant to be a host cron. See PENDING.md.
@@ -70,47 +43,6 @@ services:
       - "/data/series"
       #- "--arc"
       #- "skypiea"
-
-  # --- Anisette server (Apple auth headers for air-tag; self-hosted, no Mac needed) ---
-  # Pin to a digest for reproducibility once you have one:
-  #   docker inspect --format '{{index .RepoDigests 0}}' anisette
-  anisette:
-    image: dadoum/anisette-v3-server@${ANISETTE_DIGEST}
-    container_name: anisette
-    labels:
-      prometheus.probe: "http://anisette:6969/"
-    restart: unless-stopped
-    profiles: [airtag, all]
-    networks:
-      - media-network
-    volumes:
-      - ${APP_CONFIG_PATH}/anisette:/home/Alcoholic/.config/anisette-v3/lib/
-
-  # --- AirTag tracker + map (internal only; reached via Caddy, no host port) ---
-  air-tag:
-    image: ghcr.io/platanosverdes/air-tag:${AIR_TAG_VERSION}
-    container_name: air-tag
-    labels:
-      prometheus.probe: "http://air-tag:8000/"
-    restart: unless-stopped
-    profiles: [airtag, all]
-    depends_on:
-      - anisette
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
-    networks:
-      - media-network
-    environment:
-      APPLE_ID: ${AIRTAG_APPLE_ID}
-      APPLE_PASSWORD: ${AIRTAG_APPLE_PASSWORD}
-      AIRTAG_PRIVATE_KEY: ${AIRTAG_PRIVATE_KEY}
-      ANISETTE_URL: http://anisette:6969
-      POLL_INTERVAL: ${AIRTAG_POLL_INTERVAL:-900}
-      TZ: ${TZ:-Europe/Madrid}
-      DATA_DIR: /data
-    volumes:
-      - ${APP_CONFIG_PATH}/air-tag:/data
 
   # --- Telegram Bot for Academy Offers ---
   pol-academy-offers-bot:
