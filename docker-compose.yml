@@ -6,6 +6,10 @@ networks:
   # torre's alone: public-facing, so it shares no network with the rest.
   torre:
     name: torre
+  # rpi-homeserver's internal network for muninn and the bots it watches: each bot serves its
+  # /bot-stats there, on a port never published, since the document lists names.
+  muninn:
+    external: true
 
 services:
   # NOTE: the one-pace-downloader used to be scheduled by a chadburn ("ofelia") container,
@@ -48,6 +52,8 @@ services:
   pol-academy-offers-bot:
     image: ghcr.io/platanosverdes/polferreracademyoffers:${POL_BOT_VERSION}
     container_name: pol-academy-offers-bot
+    labels:
+      muninn.stats: "http://pol-academy-offers-bot:9180/bot-stats"
     restart: unless-stopped
     profiles: [bot, all]
     dns:
@@ -55,8 +61,11 @@ services:
       - 1.1.1.1
     networks:
       - media-network
+      - muninn
     environment:
       BOT_TOKEN: ${BOT_POL_ACADEMY_OFFERS_TOKEN}
+      BOT_NAME: PolFerrerAcademyOffersBot
+      BOT_STATS_ADDR: ":9180"
     volumes:
       - ${APP_CONFIG_PATH}/pol-academy-bot:/app/data
 
@@ -105,6 +114,7 @@ services:
     container_name: wallabot
     labels:
       prometheus.probe: "http://wallabot:8000/healthz"
+      muninn.stats: "http://wallabot:9180/bot-stats"
     restart: unless-stopped
     profiles: [wallapop, all]
     # Hashing a thumbnail decodes it first.
@@ -115,12 +125,15 @@ services:
       - 1.1.1.1
     networks:
       - media-network
+      - muninn
     environment:
       TZ: ${TZ:-Europe/Madrid}
       WALLA_PUSHGATEWAY: http://pushgateway:9091
       # Its own bot, public: Telegram carries the new listings of each chat's searches.
       WALLA_TELEGRAM_TOKEN: ${WALLA_TELEGRAM_TOKEN}
       WALLA_TELEGRAM_CHAT: ${WALLA_TELEGRAM_CHAT}
+      WALLA_BOT_NAME: WuallaBot
+      WALLA_STATS_ADDR: ":9180"
     volumes:
       # The chats, their searches and what each has already been told.
       - ${APP_CONFIG_PATH}/wallabot:/data
@@ -165,6 +178,7 @@ services:
     labels:
       # Probed through the public hostname, so the tunnel is checked along with the service.
       prometheus.probe: "https://torre.platanosverdes.com/healthz"
+      muninn.stats: "http://torre:9180/bot-stats"
     restart: unless-stopped
     profiles: [torre, all]
     # Two-week boards of BCN and MAD held at once peaked at 107 MiB.
@@ -176,8 +190,10 @@ services:
     pids_limit: 64
     ports:
       - "127.0.0.1:8770:8000"
+    # muninn's network too, internal, and only for its /bot-stats: still nothing else of the Pi's.
     networks:
       - torre
+      - muninn
     environment:
       TZ: ${TZ:-Europe/Madrid}
       # @TorreFlightsBot, torre's own: it sends the alerts, signs Mini App launches and torre is the
@@ -187,6 +203,7 @@ services:
       TORRE_BOT_NAME: TorreFlightsBot
       TORRE_PUBLIC_URL: https://torre.platanosverdes.com
       TORRE_CLIENT_IP_HEADER: CF-Connecting-IP
+      TORRE_STATS_ADDR: ":9180"
     volumes:
       # The followed flights. The image runs as uid 10001, so the directory must be created owned by
       # it before the first start: sudo install -d -o 10001 -g 10001 -m 700 appdata/torre
