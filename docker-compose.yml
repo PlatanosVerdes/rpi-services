@@ -3,6 +3,9 @@
 networks:
   media-network:
     external: true
+  # torre's alone: public-facing, so it shares no network with the rest.
+  torre:
+    name: torre
 
 services:
   # --- Google Calendar Bridge (ESP32 / local API) ---
@@ -219,31 +222,38 @@ services:
 
 
   # --- torre: AENA's flight board on the phone, and alerts for followed flights ---
+  # Public, through the Cloudflare Tunnel (hostname torre.platanosverdes.com -> http://localhost:8770
+  # in the tunnel's dashboard config). It sits on a network of its own, so a compromise from the
+  # internet reaches nothing else on the Pi, and it listens on loopback only, so the tunnel is the
+  # one way in. That is also what makes CF-Connecting-IP trustworthy for the rate limits.
   torre:
     image: ghcr.io/platanosverdes/torre:${TORRE_VERSION}
     container_name: torre
     labels:
-      prometheus.probe: "http://torre:8000/healthz"
+      # Probed through the public hostname, so the tunnel is checked along with the service.
+      prometheus.probe: "https://torre.platanosverdes.com/healthz"
     restart: unless-stopped
     profiles: [torre, all]
     # Two-week boards of BCN and MAD held at once peaked at 107 MiB.
     mem_limit: 192m
     memswap_limit: 192m
-    # Meant to face the internet: nothing to write but /data, nothing to escalate to.
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     pids_limit: 64
+    ports:
+      - "127.0.0.1:8770:8000"
     networks:
-      - media-network
+      - torre
     environment:
       TZ: ${TZ:-Europe/Madrid}
-      # @PlatanosServicesBot, send-only: wallapop-catalogue is its one reader of updates. It also
-      # signs the Mini App launches the page checks. A bot of torre's own replaces it once public.
-      TORRE_TELEGRAM_TOKEN: ${TELEGRAM_BOT_SERVICES}
-      # While the page is tailnet-only, a plain browser follows for the owner. Must be empty once public.
-      TORRE_OWNER_CHAT: ${WALLA_TELEGRAM_CHAT}
+      # @TorreFlightsBot, torre's own: it sends the alerts, signs Mini App launches and torre is the
+      # one reader of its updates.
+      TORRE_TELEGRAM_TOKEN: ${TELEGRAM_BOT_TORRE}
+      TORRE_BOT_UPDATES: "1"
+      TORRE_BOT_NAME: TorreFlightsBot
       TORRE_PUBLIC_URL: https://torre.platanosverdes.com
+      TORRE_CLIENT_IP_HEADER: CF-Connecting-IP
     volumes:
       # The followed flights. The image runs as uid 10001, so the directory must be created owned by
       # it before the first start: sudo install -d -o 10001 -g 10001 -m 700 appdata/torre
