@@ -1,0 +1,26 @@
+name: Host ports
+
+# Fails a PR that has two containers claiming the same host port, here or against rpi-homeserver,
+# which runs on the same Pi. The check itself lives in rpi-homeserver.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: PlatanosVerdes/rpi-homeserver
+          path: rpi-homeserver
+      # The Pi's compose: the runner's older one rejects rpi-homeserver's modules.
+      - uses: docker/setup-compose-action@v2
+        with:
+          version: v5.0.2
+      # The example's TAILSCALE_IP is a placeholder compose rejects as an address.
+      - run: sed 's/^TAILSCALE_IP=.*/TAILSCALE_IP=100.64.0.1/' rpi-homeserver/.env.example > rpi-homeserver/.env
+      - run: python3 rpi-homeserver/scripts/ci/ports.py rpi-homeserver .
