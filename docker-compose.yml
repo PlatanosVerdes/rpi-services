@@ -229,13 +229,22 @@ services:
     # Two-week boards of BCN and MAD held at once peaked at 107 MiB.
     mem_limit: 192m
     memswap_limit: 192m
+    # Meant to face the internet: nothing to write but /data, nothing to escalate to.
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
     networks:
       - media-network
     environment:
       TZ: ${TZ:-Europe/Madrid}
-      # @PlatanosServicesBot, send-only: wallapop-catalogue is its one reader of updates.
+      # @PlatanosServicesBot, send-only: wallapop-catalogue is its one reader of updates. It also
+      # signs the Mini App launches the page checks. A bot of torre's own replaces it once public.
       TORRE_TELEGRAM_TOKEN: ${TELEGRAM_BOT_SERVICES}
-      TORRE_TELEGRAM_CHAT: ${WALLA_TELEGRAM_CHAT}
+      # While the page is tailnet-only, a plain browser follows for the owner. Must be empty once public.
+      TORRE_OWNER_CHAT: ${WALLA_TELEGRAM_CHAT}
+      TORRE_PUBLIC_URL: https://torre.platanosverdes.com
     volumes:
-      # The followed flights.
+      # The followed flights. The image runs as uid 10001, so the directory must be created owned by
+      # it before the first start: sudo install -d -o 10001 -g 10001 -m 700 appdata/torre
       - ${APP_CONFIG_PATH}/torre:/data
