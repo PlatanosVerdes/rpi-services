@@ -6,9 +6,6 @@
 #
 # Do NOT edit the live crontab with `crontab -e`, it gets overwritten on the next deploy.
 
-# cal-bridge metrics (MS client secret expiry, etc.), daily at 09:00
-0 9 * * * /home/raspi/rpi-services/scripts/cal-bridge-metrics.sh
-
 # Download new One Pace episodes daily at 03:00
 # COMPOSE_ENV_FILES is required: the image tag lives in versions.env. --build is not
 # redundant: the `one-pace` profile keeps the deploy from ever building this one.
