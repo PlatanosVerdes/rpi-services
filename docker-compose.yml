@@ -203,6 +203,7 @@ services:
       TORRE_CLIENT_IP_HEADER: CF-Connecting-IP
       TORRE_STATS_ADDR: ":9180"
       TORRE_COLLECT: PMI,BCN
+      TORRE_SAMPLE: "200"
     volumes:
       # The followed flights. The image runs as uid 10001, so the directory must be created owned by
       # it before the first start: sudo install -d -o 10001 -g 10001 -m 700 appdata/torre
