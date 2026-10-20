@@ -1,10 +1,5 @@
 # streamhalla, the second machine, by name instead of IP:port. Caddy reaches it over Tailscale, so
 # these only work from the tailnet; its LAN keeps using the machine directly (the TV's Jellyfin app).
-https://streamhalla.platanosverdes.com {
-    import cf_tls
-    reverse_proxy 100.120.107.32:3001
-}
-
 https://prometheus.streamhalla.platanosverdes.com {
     import cf_tls
     reverse_proxy 100.120.107.32:9090
