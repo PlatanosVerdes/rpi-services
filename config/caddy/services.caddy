@@ -1,6 +1,5 @@
-# laliga-fantasy — panel de decisiones del fantasy. Solo alcanzable dentro del
-# tailnet, que es la unica puerta: la pagina puede lanzar pujas con dinero real, asi
-# que lo que la protege es que nadie mas llega hasta aqui.
+# laliga-fantasy's tailnet door. The page can place real bids: from outside it is only
+# reachable through Cloudflare Access, which goes to the app directly, not through here.
 https://fantasy.platanosverdes.com {
     log
     import cf_tls
