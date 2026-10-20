@@ -84,7 +84,10 @@ services:
   # crea el usuario.
   #   --read-only  apaga toda operacion
   #   --no-auto    deja los botones pero suspende las instrucciones programadas
-  # Por eso el basic_auth de services.caddy no es opcional.
+  # So it is never reachable without a login. Two doors: 8000 is the tailnet one, through
+  # Caddy; 8001 is the Cloudflare tunnel's (fantasy.platanosverdes.com -> 127.0.0.1:8771),
+  # behind Access with Google, and the app itself refuses any request without a valid Access
+  # token there. The tailnet door is the way in when Cloudflare is blocked during matches.
   laliga-fantasy:
     image: ghcr.io/platanosverdes/laliga-fantasy:${LALIGA_FANTASY_VERSION}
     container_name: laliga-fantasy
@@ -96,11 +99,15 @@ services:
     memswap_limit: 320m
     # Writes are on: nothing moves without confirming it in the page, and the standing
     # instructions only fire within the limits set there.
-    command: ["serve", "--port", "8000", "--interval", "120", "--deep"]
+    command: ["serve", "--port", "8000", "--access-port", "8001", "--interval", "120", "--deep"]
+    ports:
+      - "127.0.0.1:8771:8001"
     environment:
       TZ: ${TZ:-Europe/Madrid}
       # JSON por stdout: Vector ya recoge los logs de cada contenedor.
       FANTASY_LOG_JSON: "1"
+      FANTASY_ACCESS_TEAM_DOMAIN: platanosverdes.cloudflareaccess.com
+      FANTASY_ACCESS_AUD: b30deb0cd1a12b5bb963010d5e107743820f201f4a7c11273d44799ab29c1609
     volumes:
       # Sesion, cache, favoritos e informe. La sesion debe persistir.
       - ${APP_CONFIG_PATH}/laliga-fantasy:/data
