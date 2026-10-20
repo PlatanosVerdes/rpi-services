@@ -1,0 +1,11 @@
+# Mounted into rpi-homeserver's Grafana (EXT_GRAFANA_DATASOURCES): streamhalla's own Prometheus,
+# reached over Tailscale, so its dashboards live in the one Grafana with the Google sign-in.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus streamhalla
+    uid: prometheus-streamhalla
+    type: prometheus
+    access: proxy
+    url: http://100.120.107.32:9090
+    editable: false
