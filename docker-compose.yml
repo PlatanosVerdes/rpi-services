@@ -68,23 +68,19 @@ services:
     volumes:
       - ${APP_CONFIG_PATH}/pol-academy-bot:/app/data
 
-  # --- LaLiga Fantasy: panel de decisiones (mercado, clausulas, rivales) ---
-  # Lee la API oficial de LaLiga Fantasy y futbolfantasy.com, y sirve un panel en
-  # vivo (API JSON + push por SSE). Sin dependencias: la imagen es python-alpine
-  # con el paquete copiado dentro.
+  # --- LaLiga Fantasy: decision panel (market, clauses, rivals) ---
+  # Reads the official LaLiga Fantasy API and futbolfantasy.com and serves a live panel.
+  # The session is the one thing that cannot be regenerated: it is set from the page itself
+  # and the refresh token keeps it alive in /data.
   #
-  # La sesion es lo unico que no se puede regenerar: se importa una vez desde el
-  # navegador (`auth browser` + `auth code`) y se copia tokens.json a este volumen.
-  # A partir de ahi el refresh token la mantiene viva, igual que la app oficial.
+  # This page CAN spend real money (bids, sales, offers, clauses) and runs the standing
+  # instructions in /data/policies.json without asking. `--read-only` turns every write off,
+  # `--no-auto` keeps the buttons but suspends the standing instructions.
   #
-  # Esta pagina PUEDE gastar dinero real: pujar, vender, aceptar ofertas y pagar
-  # clausulas. Y ejecuta las instrucciones programadas (siempre-en-mercado,
-  # clausulazos) sin preguntar, que es justamente para lo que estan: una clausula se
-  # libera cuando se libera. Las instrucciones viven en data/policies.json y solo las
-  # crea el usuario.
-  #   --read-only  apaga toda operacion
-  #   --no-auto    deja los botones pero suspende las instrucciones programadas
-  # Por eso el basic_auth de services.caddy no es opcional.
+  # So it is never reachable without a login. Two doors: 8000 is the tailnet one, through
+  # Caddy; 8001 is the Cloudflare tunnel's (fantasy.platanosverdes.com -> 127.0.0.1:8771),
+  # behind Access with Google, and the app itself refuses any request without a valid Access
+  # token there. The tailnet door is the way in when Cloudflare is blocked during matches.
   laliga-fantasy:
     image: ghcr.io/platanosverdes/laliga-fantasy:${LALIGA_FANTASY_VERSION}
     container_name: laliga-fantasy
@@ -96,13 +92,17 @@ services:
     memswap_limit: 320m
     # Writes are on: nothing moves without confirming it in the page, and the standing
     # instructions only fire within the limits set there.
-    command: ["serve", "--port", "8000", "--interval", "120", "--deep"]
+    command: ["serve", "--port", "8000", "--access-port", "8001", "--interval", "120", "--deep"]
+    ports:
+      - "127.0.0.1:8771:8001"
     environment:
       TZ: ${TZ:-Europe/Madrid}
-      # JSON por stdout: Vector ya recoge los logs de cada contenedor.
+      # JSON on stdout: Vector already collects every container's logs.
       FANTASY_LOG_JSON: "1"
+      FANTASY_ACCESS_TEAM_DOMAIN: platanosverdes.cloudflareaccess.com
+      FANTASY_ACCESS_AUD: b30deb0cd1a12b5bb963010d5e107743820f201f4a7c11273d44799ab29c1609
     volumes:
-      # Sesion, cache, favoritos e informe. La sesion debe persistir.
+      # Session, cache, favourites and report. The session must persist.
       - ${APP_CONFIG_PATH}/laliga-fantasy:/data
     networks:
       - media-network
