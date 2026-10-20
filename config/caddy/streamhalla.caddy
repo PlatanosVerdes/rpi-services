@@ -5,11 +5,6 @@ https://streamhalla.platanosverdes.com {
     reverse_proxy 100.120.107.32:3001
 }
 
-https://grafana.streamhalla.platanosverdes.com {
-    import cf_tls
-    reverse_proxy 100.120.107.32:3000
-}
-
 https://prometheus.streamhalla.platanosverdes.com {
     import cf_tls
     reverse_proxy 100.120.107.32:9090
