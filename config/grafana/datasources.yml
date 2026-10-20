@@ -2,8 +2,14 @@
 # reached over Tailscale, so its dashboards live in the one Grafana with the Google sign-in.
 apiVersion: 1
 
-datasources:
+# The name is what the dashboards' Node selector shows. Provisioning matches by name and refuses a
+# second datasource with the same uid, so the old name is deleted before this one is inserted.
+deleteDatasources:
   - name: Prometheus streamhalla
+    orgId: 1
+
+datasources:
+  - name: streamhalla
     uid: prometheus-streamhalla
     type: prometheus
     access: proxy
