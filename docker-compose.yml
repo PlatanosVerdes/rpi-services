@@ -86,6 +86,8 @@ services:
     container_name: laliga-fantasy
     labels:
       prometheus.probe: "http://laliga-fantasy:8000/healthz"
+      # The public way in, through the tunnel and Access: healthy is the redirect to the login.
+      prometheus.probe.access: "https://fantasy.platanosverdes.com/"
     restart: unless-stopped
     profiles: [fantasy, all]
     mem_limit: 320m
