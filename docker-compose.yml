@@ -101,6 +101,8 @@ services:
       TZ: ${TZ:-Europe/Madrid}
       # JSON on stdout: Vector already collects every container's logs.
       FANTASY_LOG_JSON: "1"
+      # futbolfantasy's ceilings only change with the nightly price adjustment: one read a day each.
+      FANTASY_CEILING_TTL: 24h
       FANTASY_ACCESS_TEAM_DOMAIN: platanosverdes.cloudflareaccess.com
       FANTASY_ACCESS_AUD: b30deb0cd1a12b5bb963010d5e107743820f201f4a7c11273d44799ab29c1609
     volumes:
