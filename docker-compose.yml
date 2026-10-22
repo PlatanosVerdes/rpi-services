@@ -111,6 +111,27 @@ services:
     networks:
       - media-network
 
+  # --read-only stays fixed: a branch under test never moves money.
+  # Own data and login: sharing prod's refresh token would end prod's session.
+  laliga-fantasy-stage:
+    image: ghcr.io/platanosverdes/laliga-fantasy:${LALIGA_FANTASY_STAGE_VERSION}
+    container_name: laliga-fantasy-stage
+    restart: unless-stopped
+    profiles: [fantasy, all]
+    deploy:
+      replicas: ${LALIGA_FANTASY_STAGE_ON:-0}
+    mem_limit: 320m
+    memswap_limit: 320m
+    command: ["serve", "--port", "8000", "--read-only", "--interval", "600"]
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      FANTASY_LOG_JSON: "1"
+      FANTASY_CEILING_TTL: 24h
+    volumes:
+      - ${APP_CONFIG_PATH}/laliga-fantasy-stage:/data
+    networks:
+      - media-network
+
   # --- Wallabot: the public bot that watches Wallapop searches ---
   wallabot:
     image: ghcr.io/platanosverdes/wallabot:${WALLABOT_VERSION}

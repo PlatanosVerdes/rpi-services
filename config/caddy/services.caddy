@@ -6,3 +6,11 @@ https://fantasy.platanosverdes.com {
 
     reverse_proxy laliga-fantasy:8000
 }
+
+# Off most of the time, 502 then.
+https://fantasy-stage.platanosverdes.com {
+    log
+    import cf_tls
+
+    reverse_proxy laliga-fantasy-stage:8000
+}
