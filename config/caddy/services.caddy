@@ -7,7 +7,7 @@ https://fantasy.platanosverdes.com {
     reverse_proxy laliga-fantasy:8000
 }
 
-# laliga-fantasy's stage: read-only, a branch under test, off most of the time (502 then).
+# Off most of the time, 502 then.
 https://fantasy-stage.platanosverdes.com {
     log
     import cf_tls

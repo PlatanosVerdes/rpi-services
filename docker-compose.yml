@@ -111,10 +111,8 @@ services:
     networks:
       - media-network
 
-  # Stage: a branch built by the app's Stage workflow, tailnet only at fantasy-stage. Off unless
-  # LALIGA_FANTASY_STAGE_ON is 1, since every LaLiga call it makes doubles one from this IP.
-  # `--read-only` is fixed here, not in a variable: a branch under test must never move money.
-  # Its own data folder and its own login: sharing prod's refresh token would end prod's session.
+  # --read-only stays fixed: a branch under test never moves money.
+  # Own data and login: sharing prod's refresh token would end prod's session.
   laliga-fantasy-stage:
     image: ghcr.io/platanosverdes/laliga-fantasy:${LALIGA_FANTASY_STAGE_VERSION}
     container_name: laliga-fantasy-stage
