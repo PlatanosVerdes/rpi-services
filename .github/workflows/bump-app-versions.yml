@@ -9,8 +9,11 @@ on:
         description: App repo, e.g. laliga-fantasy
         required: true
       tag:
-        description: Published tag, e.g. v2026.10.17.1
+        description: Published tag, e.g. v2026.10.17.1; for the stage, stage-<sha> or off
         required: true
+      slot:
+        description: prod, or stage for the app's <VAR>_STAGE_VERSION service
+        default: prod
 
 concurrency:
   group: bump-app-versions
@@ -31,25 +34,42 @@ jobs:
         env:
           APP: ${{ inputs.app }}
           TAG: ${{ inputs.tag }}
+          SLOT: ${{ inputs.slot }}
         run: |
           set -euo pipefail
           # The deploy token can start this with any input, so nothing unchecked reaches the shell.
           [[ "$APP" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::bad app: $APP"; exit 1; }
-          [[ "$TAG" =~ ^v[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$ ]] || { echo "::error::bad tag: $TAG"; exit 1; }
+          case "$SLOT" in
+            prod) [[ "$TAG" =~ ^v[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$ ]] ;;
+            stage) [[ "$TAG" =~ ^(stage-[0-9a-f]{12}|off)$ ]] ;;
+            *) false ;;
+          esac || { echo "::error::bad $SLOT tag: $TAG"; exit 1; }
 
           image="ghcr.io/platanosverdes/${APP,,}"
-          var=$(perl -ne 'BEGIN{$i=shift} print "$1\n" if /image: \Q$i\E:\$\{([A-Z0-9_]+)\}/' "$image" docker-compose.yml)
-          [[ -n "$var" ]] || { echo "::error::$image is not in docker-compose.yml"; exit 1; }
-          docker manifest inspect "$image:$TAG" >/dev/null ||
-            { echo "::error::$image:$TAG is not published"; exit 1; }
+          vars=$(perl -ne 'BEGIN{$i=shift} print "$1\n" if /image: \Q$i\E:\$\{([A-Z0-9_]+)\}/' "$image" docker-compose.yml)
+          if [[ "$SLOT" == stage ]]; then
+            var=$(grep '_STAGE_VERSION$' <<<"$vars" || true)
+          else
+            var=$(grep -v '_STAGE_VERSION$' <<<"$vars" || true)
+          fi
+          [[ -n "$var" && "$var" != *$'\n'* ]] || { echo "::error::no single $SLOT service for $image"; exit 1; }
 
-          sed -i "s|^$var=.*|$var=$TAG|" versions.env
+          if [[ "$TAG" == off ]]; then
+            sed -i "s|^${var%_VERSION}_ON=.*|${var%_VERSION}_ON=0|" versions.env
+          else
+            docker manifest inspect "$image:$TAG" >/dev/null ||
+              { echo "::error::$image:$TAG is not published"; exit 1; }
+            sed -i "s|^$var=.*|$var=$TAG|" versions.env
+            [[ "$SLOT" == stage ]] && sed -i "s|^${var%_VERSION}_ON=.*|${var%_VERSION}_ON=1|" versions.env
+          fi
           if git diff --quiet -- versions.env; then
-            echo "$APP is already on $TAG"
+            echo "$APP $SLOT is already on $TAG"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -qm "Deploy $APP $TAG" -- versions.env
+          label="$APP"
+          [[ "$SLOT" == stage ]] && label="$APP stage"
+          git commit -qm "Deploy $label $TAG" -- versions.env
           git pull --rebase --quiet origin main
           git push
