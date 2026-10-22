@@ -105,6 +105,8 @@ services:
       FANTASY_CEILING_TTL: 24h
       FANTASY_ACCESS_TEAM_DOMAIN: platanosverdes.cloudflareaccess.com
       FANTASY_ACCESS_AUD: b30deb0cd1a12b5bb963010d5e107743820f201f4a7c11273d44799ab29c1609
+      # Seals the LaLiga sessions in /data; kept in SOPS, so a copy of the volume alone opens nothing.
+      FANTASY_SECRET_KEY: ${FANTASY_SECRET_KEY}
     volumes:
       # Session, cache, favourites and report. The session must persist.
       - ${APP_CONFIG_PATH}/laliga-fantasy:/data
