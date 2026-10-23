@@ -1,0 +1,4 @@
+Grafana dashboards for rpi-homeserver's Grafana, mounted through EXT_GRAFANA_DASHBOARDS.
+Each subfolder is a Grafana folder. This file keeps the directory from ever being emptied by a
+checkout: a bind mount follows the directory it was made on, and git deleting and recreating it
+leaves Grafana looking at nothing until it restarts.
