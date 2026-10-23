@@ -2,11 +2,11 @@
   "uid": "laliga-fantasy",
   "title": "LaLiga Fantasy",
   "tags": [
-    "fantasy",
+    "services",
     "laliga-fantasy"
   ],
   "schemaVersion": 42,
-  "version": 2,
+  "version": 3,
   "editable": true,
   "graphTooltip": 1,
   "preload": false,
@@ -27,7 +27,7 @@
   "panels": [
     {
       "type": "row",
-      "title": "Estado",
+      "title": "Health",
       "collapsed": false,
       "panels": [],
       "id": 1,
@@ -41,7 +41,7 @@
     {
       "type": "stat",
       "title": "Panel",
-      "description": "El /healthz del contenedor y la entrada pública por Cloudflare Access: arriba solo si responden los dos.",
+      "description": "Both probes: the container's /healthz and the public entry through Cloudflare Access.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -54,11 +54,11 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "caído",
+                  "text": "DOWN",
                   "color": "red"
                 },
                 "1": {
-                  "text": "arriba",
+                  "text": "UP",
                   "color": "green"
                 }
               }
@@ -84,12 +84,13 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "textMode": "auto",
         "wideLayout": true,
+        "showPercentChange": false,
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -106,22 +107,22 @@
           },
           "refId": "A",
           "expr": "min(probe_success{service=\"laliga-fantasy\"})",
-          "instant": true,
-          "legendFormat": "__auto"
+          "legendFormat": "__auto",
+          "instant": true
         }
       ],
       "id": 2,
       "gridPos": {
-        "h": 4,
-        "w": 4,
+        "h": 5,
+        "w": 3,
         "x": 0,
         "y": 1
       }
     },
     {
       "type": "stat",
-      "title": "Versión",
-      "description": "La imagen que corre ahora.",
+      "title": "Version",
+      "description": "The image running now.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -131,7 +132,8 @@
           "unit": "short",
           "mappings": [],
           "color": {
-            "mode": "thresholds"
+            "mode": "fixed",
+            "fixedColor": "blue"
           },
           "thresholds": {
             "mode": "absolute",
@@ -146,12 +148,13 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "textMode": "name",
         "wideLayout": true,
+        "showPercentChange": false,
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -168,22 +171,86 @@
           },
           "refId": "A",
           "expr": "label_replace(topk(1, container_last_seen{name=\"laliga-fantasy\"}), \"version\", \"$1\", \"image\", \".*:(.*)\")",
-          "instant": true,
-          "legendFormat": "{{version}}"
+          "legendFormat": "{{version}}",
+          "instant": true
         }
       ],
       "id": 3,
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 4,
+        "h": 5,
+        "w": 4,
+        "x": 3,
         "y": 1
       }
     },
     {
       "type": "stat",
-      "title": "LaLiga nos frena",
-      "description": "1 mientras la cola está en pausa tras un 429.",
+      "title": "Uptime",
+      "description": "Since the container last started (a deploy or a restart).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "mappings": [],
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "time() - max(container_start_time_seconds{name=\"laliga-fantasy\"})",
+          "legendFormat": "__auto",
+          "instant": true
+        }
+      ],
+      "id": 4,
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 7,
+        "y": 1
+      }
+    },
+    {
+      "type": "stat",
+      "title": "LaLiga throttling",
+      "description": "Whether the request queue is paused after a 429.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -196,11 +263,11 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "no",
+                  "text": "No",
                   "color": "green"
                 },
                 "1": {
-                  "text": "en pausa",
+                  "text": "Paused",
                   "color": "red"
                 }
               }
@@ -226,12 +293,13 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "textMode": "auto",
         "wideLayout": true,
+        "showPercentChange": false,
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -248,22 +316,22 @@
           },
           "refId": "A",
           "expr": "max(upstream_paused{upstream=\"fantasy-api.llt-services.com\"})",
-          "instant": true,
-          "legendFormat": "__auto"
+          "legendFormat": "__auto",
+          "instant": true
         }
       ],
-      "id": 4,
+      "id": 5,
       "gridPos": {
-        "h": 4,
-        "w": 4,
+        "h": 5,
+        "w": 3,
         "x": 10,
         "y": 1
       }
     },
     {
       "type": "stat",
-      "title": "Peticiones 24h",
-      "description": "Peticiones enviadas a la API de LaLiga en las últimas 24 horas (las que sirve la caché no cuentan).",
+      "title": "Requests · 24h",
+      "description": "Requests sent to the LaLiga API in the last 24 hours; cache hits do not count.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -273,7 +341,8 @@
           "unit": "short",
           "mappings": [],
           "color": {
-            "mode": "thresholds"
+            "mode": "fixed",
+            "fixedColor": "purple"
           },
           "thresholds": {
             "mode": "absolute",
@@ -283,17 +352,19 @@
                 "value": null
               }
             ]
-          }
+          },
+          "decimals": 0
         },
         "overrides": []
       },
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
+        "graphMode": "area",
+        "justifyMode": "center",
         "orientation": "auto",
         "textMode": "auto",
         "wideLayout": true,
+        "showPercentChange": false,
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -310,22 +381,22 @@
           },
           "refId": "A",
           "expr": "sum(increase(upstream_requests_total{upstream=\"fantasy-api.llt-services.com\"}[24h]))",
-          "instant": true,
-          "legendFormat": "__auto"
+          "legendFormat": "__auto",
+          "range": true
         }
       ],
-      "id": 5,
+      "id": 6,
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 4,
-        "x": 14,
+        "x": 13,
         "y": 1
       }
     },
     {
       "type": "stat",
-      "title": "429 en 24h",
-      "description": "Respuestas 429 de LaLiga en las últimas 24 horas.",
+      "title": "429s · 24h",
+      "description": "Rate-limit answers from LaLiga in the last 24 hours.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -349,17 +420,19 @@
                 "value": 1
               }
             ]
-          }
+          },
+          "decimals": 0
         },
         "overrides": []
       },
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
+        "graphMode": "area",
+        "justifyMode": "center",
         "orientation": "auto",
         "textMode": "auto",
         "wideLayout": true,
+        "showPercentChange": false,
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -376,22 +449,22 @@
           },
           "refId": "A",
           "expr": "sum(increase(upstream_rate_limited_total[24h]))",
-          "instant": true,
-          "legendFormat": "__auto"
+          "legendFormat": "__auto",
+          "range": true
         }
       ],
-      "id": 6,
+      "id": 7,
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 3,
-        "x": 18,
+        "x": 17,
         "y": 1
       }
     },
     {
       "type": "stat",
-      "title": "Memoria",
-      "description": "Memoria en uso del contenedor.",
+      "title": "Memory",
+      "description": "Working set of the container.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -401,7 +474,8 @@
           "unit": "bytes",
           "mappings": [],
           "color": {
-            "mode": "thresholds"
+            "mode": "fixed",
+            "fixedColor": "orange"
           },
           "thresholds": {
             "mode": "absolute",
@@ -417,11 +491,12 @@
       },
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
+        "graphMode": "area",
+        "justifyMode": "center",
         "orientation": "auto",
         "textMode": "auto",
         "wideLayout": true,
+        "showPercentChange": false,
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -438,35 +513,510 @@
           },
           "refId": "A",
           "expr": "max(container_memory_working_set_bytes{name=\"laliga-fantasy\"})",
-          "instant": true,
-          "legendFormat": "__auto"
+          "legendFormat": "__auto",
+          "range": true
         }
       ],
-      "id": 7,
+      "id": 8,
       "gridPos": {
-        "h": 4,
-        "w": 3,
-        "x": 21,
+        "h": 5,
+        "w": 4,
+        "x": 20,
         "y": 1
       }
     },
     {
       "type": "row",
-      "title": "LaLiga y reconstrucciones",
+      "title": "Team",
       "collapsed": false,
       "panels": [],
-      "id": 8,
+      "id": 9,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 6
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Balance",
+      "description": "Real balance, read when the plan was last drawn.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyEUR",
+          "mappings": [],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "container:laliga-fantasy _msg:\"plan ready\" | math cash_before + committed as balance | stats max(balance) balance",
+          "queryType": "statsRange"
+        }
+      ],
+      "id": 10,
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 7
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Pending bids",
+      "description": "What live bids and offers hold of the balance.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyEUR",
+          "mappings": [],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "container:laliga-fantasy _msg:\"plan ready\" | stats max(committed) pending",
+          "queryType": "statsRange"
+        }
+      ],
+      "id": 11,
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 7
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Free",
+      "description": "Balance minus pending bids: what can be spent now.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyEUR",
+          "mappings": [],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "container:laliga-fantasy _msg:\"plan ready\" | stats max(cash_before) free",
+          "queryType": "statsRange"
+        }
+      ],
+      "id": 12,
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 7
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Plan gain",
+      "description": "Expected points the plan's moves add to the eleven.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "mappings": [],
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0.5
+              }
+            ]
+          },
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "container:laliga-fantasy _msg:\"plan ready\" | math xpts_after - xpts_before as gain | stats max(gain) gain",
+          "queryType": "statsRange"
+        }
+      ],
+      "id": 13,
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 7
       }
     },
     {
       "type": "timeseries",
-      "title": "Peticiones a LaLiga",
-      "description": "Por minuto. Rechazadas: las que la cola no mandó por estar en pausa o por esperar demasiado.",
+      "title": "Balance",
+      "description": "Balance, pending bids and free cash over time.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyEUR",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 18,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": true,
+            "lineInterpolation": "smooth",
+            "barAlignment": 0,
+            "axisBorderShow": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "balance"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pending"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "free"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "container:laliga-fantasy _msg:\"plan ready\" | math cash_before + committed as balance | stats max(balance) balance, max(committed) pending, max(cash_before) free",
+          "queryType": "statsRange"
+        }
+      ],
+      "id": 14,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Expected points",
+      "description": "The eleven's expected points as it is, and with the plan's moves.",
+      "datasource": {
+        "type": "victoriametrics-logs-datasource",
+        "uid": "victorialogs"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": true,
+            "lineInterpolation": "smooth",
+            "barAlignment": 0,
+            "axisBorderShow": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "current"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "with plan"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "victoriametrics-logs-datasource",
+            "uid": "victorialogs"
+          },
+          "refId": "A",
+          "expr": "container:laliga-fantasy _msg:\"plan ready\" | stats max(xpts_before) current, max(xpts_after) \"with plan\"",
+          "queryType": "statsRange"
+        }
+      ],
+      "id": 15,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      }
+    },
+    {
+      "type": "row",
+      "title": "LaLiga API",
+      "collapsed": false,
+      "panels": [],
+      "id": 16,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests per minute",
+      "description": "Sent, rate-limited (429) and refused by the queue while paused or past their patience.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -474,25 +1024,82 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 10,
+            "fillOpacity": 18,
+            "gradientMode": "opacity",
             "showPoints": "never",
             "spanNulls": true,
+            "lineInterpolation": "smooth",
+            "barAlignment": 0,
+            "axisBorderShow": false,
             "stacking": {
               "mode": "none",
               "group": "A"
             }
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "sent"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "429"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "refused"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
-          "displayMode": "list",
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "max"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -507,7 +1114,7 @@
           },
           "refId": "A",
           "expr": "sum(rate(upstream_requests_total{upstream=\"fantasy-api.llt-services.com\"}[5m])) * 60",
-          "legendFormat": "enviadas",
+          "legendFormat": "sent",
           "range": true
         },
         {
@@ -527,22 +1134,22 @@
           },
           "refId": "C",
           "expr": "sum(rate(upstream_refused_total[5m])) * 60",
-          "legendFormat": "rechazadas",
+          "legendFormat": "refused",
           "range": true
         }
       ],
-      "id": 9,
+      "id": 17,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 6
+        "y": 21
       }
     },
     {
       "type": "timeseries",
-      "title": "Reconstrucciones del mundo",
-      "description": "Cuánto tarda cada reconstrucción (máximo y media por intervalo).",
+      "title": "World rebuilds",
+      "description": "How long each rebuild takes: slowest and average per interval.",
       "datasource": {
         "type": "victoriametrics-logs-datasource",
         "uid": "victorialogs"
@@ -550,25 +1157,67 @@
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "lineWidth": 2,
-            "fillOpacity": 10,
+            "fillOpacity": 18,
+            "gradientMode": "opacity",
             "showPoints": "never",
             "spanNulls": true,
+            "lineInterpolation": "smooth",
+            "barAlignment": 0,
+            "axisBorderShow": false,
             "stacking": {
               "mode": "none",
               "group": "A"
             }
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "slowest"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "average"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
-          "displayMode": "list",
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": [
+            "mean",
+            "max"
+          ]
         },
         "tooltip": {
           "mode": "multi",
@@ -582,35 +1231,35 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "container:laliga-fantasy _msg:\"world rebuilt\" | stats max(ms) max, avg(ms) media",
+          "expr": "container:laliga-fantasy _msg:\"world rebuilt\" | stats max(ms) slowest, avg(ms) average",
           "queryType": "statsRange"
         }
       ],
-      "id": 10,
+      "id": 18,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 6
+        "y": 21
       }
     },
     {
       "type": "row",
-      "title": "Equipo",
+      "title": "Activity",
       "collapsed": false,
       "panels": [],
-      "id": 11,
+      "id": 19,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 29
       }
     },
     {
       "type": "timeseries",
-      "title": "xPts del plan",
-      "description": "Los puntos esperados del once antes y después de los movimientos que propone el plan.",
+      "title": "Writes by operation",
+      "description": "Every write that reached LaLiga, by operation: bids, offers, clauses, lineups, favourites.",
       "datasource": {
         "type": "victoriametrics-logs-datasource",
         "uid": "victorialogs"
@@ -618,14 +1267,21 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
-            "drawStyle": "line",
+            "drawStyle": "bars",
             "lineWidth": 2,
-            "fillOpacity": 10,
+            "fillOpacity": 85,
+            "gradientMode": "none",
             "showPoints": "never",
             "spanNulls": true,
+            "lineInterpolation": "smooth",
+            "barAlignment": 0,
+            "axisBorderShow": false,
             "stacking": {
-              "mode": "none",
+              "mode": "normal",
               "group": "A"
             }
           }
@@ -636,7 +1292,8 @@
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": []
         },
         "tooltip": {
           "mode": "multi",
@@ -650,48 +1307,88 @@
             "uid": "victorialogs"
           },
           "refId": "A",
-          "expr": "container:laliga-fantasy _msg:\"plan ready\" | stats max(xpts_before) \"sin cambios\", max(xpts_after) \"con el plan\"",
-          "queryType": "statsRange"
+          "expr": "container:laliga-fantasy _msg:in(\"write done\",\"automatic write done\") | stats by (operation) count() writes",
+          "queryType": "statsRange",
+          "legendFormat": "{{operation}}"
         }
       ],
-      "id": 12,
+      "id": 20,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 15
+        "y": 30
       }
     },
     {
       "type": "timeseries",
-      "title": "Caja",
-      "description": "Saldo real, lo que tienes en pujas y ofertas pendientes y lo que queda libre.",
+      "title": "Panel use",
+      "description": "Requests to the panel by entry: access is the public one behind Cloudflare Access, private the tailnet.",
       "datasource": {
         "type": "victoriametrics-logs-datasource",
         "uid": "victorialogs"
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyEUR",
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
-            "drawStyle": "line",
+            "drawStyle": "bars",
             "lineWidth": 2,
-            "fillOpacity": 10,
+            "fillOpacity": 85,
+            "gradientMode": "none",
             "showPoints": "never",
             "spanNulls": true,
+            "lineInterpolation": "smooth",
+            "barAlignment": 0,
+            "axisBorderShow": false,
             "stacking": {
-              "mode": "none",
+              "mode": "normal",
               "group": "A"
             }
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "access"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "private"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": true,
+          "calcs": []
         },
         "tooltip": {
           "mode": "multi",
@@ -705,35 +1402,196 @@
             "uid": "victorialogs"
           },
           "refId": "A",
+          "expr": "container:laliga-fantasy _msg:http door:* | stats by (door) count() requests",
           "queryType": "statsRange",
-          "expr": "container:laliga-fantasy _msg:\"plan ready\" | math cash_before + committed as saldo | stats max(saldo) saldo, max(committed) \"en pujas\", max(cash_before) libre"
+          "legendFormat": "{{door}}"
         }
       ],
-      "id": 13,
+      "id": 21,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 15
+        "y": 30
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU",
+      "description": "CPU used by the container, in cores.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 18,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": true,
+            "lineInterpolation": "smooth",
+            "barAlignment": 0,
+            "axisBorderShow": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cpu"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{name=\"laliga-fantasy\"}[5m]))",
+          "legendFormat": "cpu",
+          "range": true
+        }
+      ],
+      "id": 22,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 38
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory",
+      "description": "Working set of the container.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 18,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "spanNulls": true,
+            "lineInterpolation": "smooth",
+            "barAlignment": 0,
+            "axisBorderShow": false,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "memory"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "max(container_memory_working_set_bytes{name=\"laliga-fantasy\"})",
+          "legendFormat": "memory",
+          "range": true
+        }
+      ],
+      "id": 23,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 38
       }
     },
     {
       "type": "row",
-      "title": "Escrituras y errores",
+      "title": "Logs",
       "collapsed": false,
       "panels": [],
-      "id": 14,
+      "id": 24,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 45
       }
     },
     {
       "type": "logs",
-      "title": "Escrituras",
-      "description": "Pujas, ofertas, cláusulas, alineaciones y favoritos: las hechas, las automáticas y las rechazadas con el motivo.",
+      "title": "Writes",
+      "description": "Done, automatic and refused writes, with the refusal's reason.",
       "datasource": {
         "type": "victoriametrics-logs-datasource",
         "uid": "victorialogs"
@@ -760,18 +1618,18 @@
         "dedupStrategy": "none",
         "sortOrder": "Descending"
       },
-      "id": 15,
+      "id": 25,
       "gridPos": {
         "h": 10,
         "w": 14,
         "x": 0,
-        "y": 24
+        "y": 46
       }
     },
     {
       "type": "logs",
-      "title": "Errores y avisos",
-      "description": "Todo lo que no es INFO, menos los 503 de /healthz mientras arranca.",
+      "title": "Warnings and errors",
+      "description": "Everything above INFO, without the /healthz 503s while it starts.",
       "datasource": {
         "type": "victoriametrics-logs-datasource",
         "uid": "victorialogs"
@@ -798,67 +1656,12 @@
         "dedupStrategy": "none",
         "sortOrder": "Descending"
       },
-      "id": 16,
+      "id": 26,
       "gridPos": {
         "h": 10,
         "w": 10,
         "x": 14,
-        "y": 24
-      }
-    },
-    {
-      "type": "timeseries",
-      "title": "Uso del panel",
-      "description": "Peticiones al panel por entrada: access es la pública con Cloudflare Access, private la de la tailnet.",
-      "datasource": {
-        "type": "victoriametrics-logs-datasource",
-        "uid": "victorialogs"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "custom": {
-            "drawStyle": "bars",
-            "lineWidth": 2,
-            "fillOpacity": 80,
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "mode": "normal",
-              "group": "A"
-            }
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "victoriametrics-logs-datasource",
-            "uid": "victorialogs"
-          },
-          "refId": "A",
-          "expr": "container:laliga-fantasy _msg:http door:* | stats by (door) count() peticiones",
-          "queryType": "statsRange"
-        }
-      ],
-      "id": 17,
-      "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 34
+        "y": 46
       }
     }
   ]
