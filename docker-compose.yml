@@ -260,6 +260,8 @@ services:
     pids_limit: 32
     networks:
       - services-bot
+      # Where blackbox-exporter probes /healthz.
+      - media-network
     environment:
       SWITCHBOARD_TELEGRAM_TOKEN: ${TELEGRAM_BOT_SERVICES}
       # One prefix=url per service on the bot; a new service is one more pair.
