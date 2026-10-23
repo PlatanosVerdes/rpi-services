@@ -286,7 +286,6 @@ services:
       # Its own bot, read by pixasso itself.
       PIXASSO_TELEGRAM_TOKEN: ${TELEGRAM_BOT_PIXASSO}
       PIXASSO_ALLOWED_CHATS: ${WALLA_TELEGRAM_CHAT}
-      PIXASSO_TV_HOST: ${PIXASSO_TV_HOST}
     volumes:
       # The TV pairing token. Owned by uid 10001 before the first start:
       # sudo install -d -o 10001 -g 10001 -m 700 appdata/pixasso
