@@ -9,6 +9,11 @@ networks:
   # rpi-homeserver's, internal: where the bots expose /bot-stats (port 9180, never published).
   muninn:
     external: true
+  # The services bot's: switchboard posts updates to the services on it, nothing else is there.
+  services-bot:
+    name: services-bot
+  pixasso:
+    name: pixasso
 
 services:
   # NOTE: the one-pace-downloader used to be scheduled by a chadburn ("ofelia") container,
@@ -181,13 +186,15 @@ services:
       - 1.1.1.1
     networks:
       - media-network
+      - services-bot
     environment:
       TZ: ${TZ:-Europe/Madrid}
       # State is reported as metrics and the alert rules decide.
       WALLA_PUSHGATEWAY: http://pushgateway:9091
-      # @PlatanosServicesBot: this is the only service reading its updates, and it answers
-      # the owner's chat alone (/wallapop_estado, /wallapop_reactivar).
+      # @PlatanosServicesBot: switchboard reads it and posts this service's updates; it answers
+      # the owner's chat alone (/wallapop_estado, /wallapop_reactivar). "poll" is the way back.
       WALLA_TELEGRAM_TOKEN: ${TELEGRAM_BOT_SERVICES}
+      WALLA_TELEGRAM_UPDATES: push
       WALLA_TELEGRAM_CHAT: ${WALLA_TELEGRAM_CHAT}
     volumes:
       # The session and the last pass.
@@ -236,3 +243,50 @@ services:
       # The followed flights. The image runs as uid 10001, so the directory must be created owned by
       # it before the first start: sudo install -d -o 10001 -g 10001 -m 700 appdata/torre
       - ${APP_CONFIG_PATH}/torre:/data
+
+  # --- switchboard: the one reader of @PlatanosServicesBot, routes each update by its prefix ---
+  switchboard:
+    image: ghcr.io/platanosverdes/switchboard:${SWITCHBOARD_VERSION}
+    container_name: switchboard
+    labels:
+      prometheus.probe: "http://switchboard:8000/healthz"
+    restart: unless-stopped
+    profiles: [wallapop, all]
+    mem_limit: 32m
+    memswap_limit: 32m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 32
+    networks:
+      - services-bot
+    environment:
+      SWITCHBOARD_TELEGRAM_TOKEN: ${TELEGRAM_BOT_SERVICES}
+      # One prefix=url per service on the bot; a new service is one more pair.
+      SWITCHBOARD_ROUTES: wallapop_=http://wallapop-catalogue:8000
+
+  # --- pixasso: hangs photos sent to its own bot on the TV's art mode ---
+  pixasso:
+    image: ghcr.io/platanosverdes/pixasso:${PIXASSO_VERSION}
+    container_name: pixasso
+    restart: unless-stopped
+    profiles: [tv, all]
+    # Fitting a 4K picture holds a few copies of it in memory.
+    mem_limit: 256m
+    memswap_limit: 256m
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    networks:
+      - pixasso
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      # Its own bot, read by pixasso itself.
+      PIXASSO_TELEGRAM_TOKEN: ${TELEGRAM_BOT_PIXASSO}
+      PIXASSO_ALLOWED_CHATS: ${WALLA_TELEGRAM_CHAT}
+    volumes:
+      # The TV pairing token. Owned by uid 10001 before the first start:
+      # sudo install -d -o 10001 -g 10001 -m 700 appdata/pixasso
+      - ${APP_CONFIG_PATH}/pixasso:/data
