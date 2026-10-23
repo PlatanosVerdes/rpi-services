@@ -12,6 +12,8 @@ networks:
   # The services bot's: switchboard posts updates to the services on it, nothing else is there.
   services-bot:
     name: services-bot
+  pixasso:
+    name: pixasso
 
 services:
   # NOTE: the one-pace-downloader used to be scheduled by a chadburn ("ofelia") container,
@@ -249,7 +251,7 @@ services:
     labels:
       prometheus.probe: "http://switchboard:8000/healthz"
     restart: unless-stopped
-    profiles: [wallapop, tv, all]
+    profiles: [wallapop, all]
     mem_limit: 32m
     memswap_limit: 32m
     read_only: true
@@ -260,11 +262,10 @@ services:
       - services-bot
     environment:
       SWITCHBOARD_TELEGRAM_TOKEN: ${TELEGRAM_BOT_SERVICES}
-      SWITCHBOARD_ROUTES: wallapop_=http://wallapop-catalogue:8000,tv_=http://pixasso:8080
-      # Photos carry no command; they are pixasso's.
-      SWITCHBOARD_FALLBACK: tv_
+      # One prefix=url per service on the bot; a new service is one more pair.
+      SWITCHBOARD_ROUTES: wallapop_=http://wallapop-catalogue:8000
 
-  # --- pixasso: hangs photos sent to the services bot on the TV's art mode ---
+  # --- pixasso: hangs photos sent to its own bot on the TV's art mode ---
   pixasso:
     image: ghcr.io/platanosverdes/pixasso:${PIXASSO_VERSION}
     container_name: pixasso
@@ -279,10 +280,11 @@ services:
     security_opt: ["no-new-privileges:true"]
     pids_limit: 64
     networks:
-      - services-bot
+      - pixasso
     environment:
       TZ: ${TZ:-Europe/Madrid}
-      PIXASSO_TELEGRAM_TOKEN: ${TELEGRAM_BOT_SERVICES}
+      # Its own bot, read by pixasso itself.
+      PIXASSO_TELEGRAM_TOKEN: ${TELEGRAM_BOT_PIXASSO}
       PIXASSO_ALLOWED_CHATS: ${WALLA_TELEGRAM_CHAT}
       PIXASSO_TV_HOST: ${PIXASSO_TV_HOST}
     volumes:
