@@ -166,7 +166,7 @@ services:
       - ${APP_CONFIG_PATH}/wallabot:/data
 
   # --- Wallapop catalogue: reactivate my expired listings daily ---
-  # The session is imported by hand once and renews itself in place; see the repo README.
+  # The session is imported by hand once and renews itself in place; see docs/laliga-fantasy.md.
   wallapop-catalogue:
     image: ghcr.io/platanosverdes/wallapop-catalogue:${WALLAPOP_CATALOGUE_VERSION}
     container_name: wallapop-catalogue
