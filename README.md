@@ -52,8 +52,9 @@ routes are added here without touching the main repo. Restart Caddy once after s
 
 ### 3. Run
 
-App versions live in `versions.env`, so compose needs both env files. `apply.sh` sets this
-automatically; to run compose by hand, export it first or the `${..._VERSION}` refs resolve empty:
+App versions live in `versions.env`, where each app's release pins its own tag ([Renovate](renovate.json)
+only updates the GitHub Actions). Compose needs both env files: `apply.sh` sets this automatically,
+and to run compose by hand, export it first or the `${..._VERSION}` refs resolve empty:
 
 ```bash
 export COMPOSE_ENV_FILES=versions.env,.env

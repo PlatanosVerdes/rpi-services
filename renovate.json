@@ -1,0 +1,20 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "timezone": "Europe/Madrid",
+  "schedule": ["* 0-6 * * 1"],
+  "minimumReleaseAge": "3 days",
+  "packageRules": [
+    {
+      "description": "The apps' own images are pinned by their release through Deploy app",
+      "matchPackageNames": ["ghcr.io/platanosverdes/**"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
+      "groupName": "github actions",
+      "automerge": true
+    }
+  ]
+}
