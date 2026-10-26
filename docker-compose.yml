@@ -256,6 +256,8 @@ services:
     container_name: apex
     labels:
       prometheus.probe: "https://apex.platanosverdes.com/healthz"
+      # Prometheus reaches this from media-network through its gateway: apex shares no network with it.
+      prometheus.scrape: "http://172.19.0.1:8781/metrics"
     restart: unless-stopped
     profiles: [apex, all]
     # About 25 MiB idle; the leg cache and a few riders planning at once stay well under this.
@@ -269,12 +271,15 @@ services:
     pids_limit: 64
     ports:
       - "127.0.0.1:8780:8000"
+      # /metrics only, on media-network's gateway address: Prometheus can read it, the tunnel cannot.
+      - "172.19.0.1:8781:9100"
     networks:
       - apex
     environment:
       TZ: ${TZ:-Europe/Madrid}
       APEX_PUBLIC_URL: https://apex.platanosverdes.com
       APEX_CLIENT_IP_HEADER: CF-Connecting-IP
+      APEX_METRICS_ADDR: ":9100"
       APEX_GOOGLE_CLIENT_ID: ${APEX_GOOGLE_CLIENT_ID}
       APEX_GOOGLE_CLIENT_SECRET: ${APEX_GOOGLE_CLIENT_SECRET}
     volumes:
