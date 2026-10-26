@@ -14,6 +14,7 @@ Both repos are deployed by `rpi-homeserver/scripts/apply.sh` (webhook on push, c
 | `wallabot` | `wallapop`, `all` | Public Telegram bot, [@WuallaBot](https://t.me/WuallaBot), that announces what is new in each chat's Wallapop searches (see [wallabot repo](https://github.com/PlatanosVerdes/wallabot)) |
 | `wallapop-catalogue` | `wallapop`, `all` | Reactivates my expired Wallapop listings daily, with commands in @PlatanosServicesBot (see [wallapop-catalogue repo](https://github.com/PlatanosVerdes/wallapop-catalogue)) |
 | `torre` | `torre`, `all` | AENA departures and arrivals on the phone, with alerts through @TorreFlightsBot. **Public**, through the Cloudflare Tunnel, on a network of its own (see [torre repo](https://github.com/PlatanosVerdes/torre)) |
+| `apex` | `apex`, `all` | Motorcycle routes on a map for Google Maps, with Google sign-in to keep them. **Public**, through the Cloudflare Tunnel, on a network of its own (see [apex repo](https://github.com/PlatanosVerdes/apex)) |
 
 ## Setup
 
