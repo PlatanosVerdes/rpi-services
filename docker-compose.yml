@@ -6,6 +6,9 @@ networks:
   # torre's alone: public-facing, so it shares no network with the rest.
   torre:
     name: torre
+  # apex's alone too, for the same reason.
+  apex:
+    name: apex
   # rpi-homeserver's, internal: where the bots expose /bot-stats (port 9180, never published).
   muninn:
     external: true
@@ -243,6 +246,41 @@ services:
       # The followed flights. The image runs as uid 10001, so the directory must be created owned by
       # it before the first start: sudo install -d -o 10001 -g 10001 -m 700 appdata/torre
       - ${APP_CONFIG_PATH}/torre:/data
+
+  # --- apex: motorcycle routes for Google Maps, with Google sign-in to keep them ---
+  # Public, through the Cloudflare Tunnel (hostname apex.platanosverdes.com -> http://localhost:8780
+  # in the tunnel's dashboard config). Same isolation as torre: a network of its own and loopback
+  # only, so the tunnel is the one way in and CF-Connecting-IP can be trusted for its rate limits.
+  apex:
+    image: ghcr.io/platanosverdes/apex:${APEX_VERSION}
+    container_name: apex
+    labels:
+      prometheus.probe: "https://apex.platanosverdes.com/healthz"
+    restart: unless-stopped
+    profiles: [apex, all]
+    # About 25 MiB idle; the leg cache and a few riders planning at once stay well under this.
+    mem_limit: 128m
+    memswap_limit: 128m
+    # Background work: never ahead of Jellyfin or the AceStream engine when the CPU is contended.
+    cpu_shares: 128
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    ports:
+      - "127.0.0.1:8780:8000"
+    networks:
+      - apex
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      APEX_PUBLIC_URL: https://apex.platanosverdes.com
+      APEX_CLIENT_IP_HEADER: CF-Connecting-IP
+      APEX_GOOGLE_CLIENT_ID: ${APEX_GOOGLE_CLIENT_ID}
+      APEX_GOOGLE_CLIENT_SECRET: ${APEX_GOOGLE_CLIENT_SECRET}
+    volumes:
+      # Riders' routes and lists and the session key. The image runs as uid 10001, so create it
+      # owned by it before the first start: sudo install -d -o 10001 -g 10001 -m 700 appdata/apex
+      - ${APP_CONFIG_PATH}/apex:/data
 
   # --- switchboard: the one reader of @PlatanosServicesBot, routes each update by its prefix ---
   switchboard:
