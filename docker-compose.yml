@@ -282,6 +282,8 @@ services:
       APEX_METRICS_ADDR: ":9100"
       APEX_GOOGLE_CLIENT_ID: ${APEX_GOOGLE_CLIENT_ID}
       APEX_GOOGLE_CLIENT_SECRET: ${APEX_GOOGLE_CLIENT_SECRET}
+      # Invites regular riders to chip in; the waits default to apex's own (see its README).
+      APEX_DONATE: url=https://ko-fi.com/platanosverdes
     volumes:
       # Riders' routes and lists and the session key. The image runs as uid 10001, so create it
       # owned by it before the first start: sudo install -d -o 10001 -g 10001 -m 700 appdata/apex
