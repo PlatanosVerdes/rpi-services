@@ -14,3 +14,16 @@ https://fantasy-stage.platanosverdes.com {
 
     reverse_proxy laliga-fantasy-stage:8000
 }
+
+# pixelhub has no auth of its own: tailnet and LAN only, never through the tunnel.
+https://pixelhub.platanosverdes.com {
+    log
+    import cf_tls
+
+    reverse_proxy pixelhub:8000
+}
+
+http://pixelhub, http://pixelhub.pi {
+    log
+    reverse_proxy pixelhub:8000
+}
