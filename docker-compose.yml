@@ -337,3 +337,29 @@ services:
       # The TV pairing token. Owned by uid 10001 before the first start:
       # sudo install -d -o 10001 -g 10001 -m 700 appdata/pixasso
       - ${APP_CONFIG_PATH}/pixasso:/data
+
+  # --- pixelhub: channels, scenes and alerts on the Divoom pixel display ---
+  # It holds the one Bluetooth session to the display through the ESP32 bridge, so nothing else may
+  # talk to the bridge while it runs. No auth: Caddy serves it to the LAN and the tailnet only.
+  pixelhub:
+    image: ghcr.io/platanosverdes/pixelhub:${PIXELHUB_VERSION}
+    container_name: pixelhub
+    restart: unless-stopped
+    profiles: [display, all]
+    mem_limit: 96m
+    memswap_limit: 96m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    networks:
+      - media-network
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      # Empty stops only this container at start, with a message, instead of failing the whole compose.
+      PIXELHUB_BRIDGE: ${PIXELHUB_BRIDGE:-}
+      PIXELHUB_DEVICE_MAC: ${PIXELHUB_DEVICE_MAC:-}
+    volumes:
+      # state.json, uploaded pictures and sprites. Owned by uid 10001 before the first start:
+      # sudo install -d -o 10001 -g 10001 -m 700 appdata/pixelhub
+      - ${APP_CONFIG_PATH}/pixelhub:/data
