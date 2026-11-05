@@ -46,7 +46,8 @@ jobs:
           esac || { echo "::error::bad $SLOT tag: $TAG"; exit 1; }
 
           image="ghcr.io/platanosverdes/${APP,,}"
-          vars=$(perl -ne 'BEGIN{$i=shift} print "$1\n" if /image: \Q$i\E:\$\{([A-Z0-9_]+)\}/' "$image" docker-compose.yml)
+          # Services sharing an image and its version variable (pixelhub and pixelbridge) count once.
+          vars=$(perl -ne 'BEGIN{$i=shift} print "$1\n" if /image: \Q$i\E:\$\{([A-Z0-9_]+)\}/' "$image" docker-compose.yml | sort -u)
           if [[ "$SLOT" == stage ]]; then
             var=$(grep '_STAGE_VERSION$' <<<"$vars" || true)
           else
