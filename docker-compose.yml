@@ -338,9 +338,31 @@ services:
       # sudo install -d -o 10001 -g 10001 -m 700 appdata/pixasso
       - ${APP_CONFIG_PATH}/pixasso:/data
 
+  # --- pixelbridge: the Pi's own Bluetooth to the Divoom display, for pixelhub ---
+  # Bluetooth sockets only exist in the host's network namespace. It listens on docker0's address
+  # only, so containers reach it and the LAN does not. The display is paired once on the host
+  # (bluetoothctl pair + trust, with its PIN); the host's Bluetooth must not be rfkill-blocked.
+  pixelbridge:
+    image: ghcr.io/platanosverdes/pixelhub:${PIXELHUB_VERSION}
+    container_name: pixelbridge
+    restart: unless-stopped
+    profiles: [display, all]
+    network_mode: host
+    entrypoint: ["pixelbridge", "-listen", "172.17.0.1:7777"]
+    mem_limit: 32m
+    memswap_limit: 32m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 16
+    healthcheck:
+      disable: true
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+
   # --- pixelhub: channels, scenes and alerts on the Divoom pixel display ---
-  # It holds the one Bluetooth session to the display through the ESP32 bridge, so nothing else may
-  # talk to the bridge while it runs. No auth: Caddy serves it to the LAN and the tailnet only.
+  # It holds the one Bluetooth session to the display through pixelbridge, so nothing else may talk
+  # to the bridge while it runs. No auth: Caddy serves it to the LAN and the tailnet only.
   pixelhub:
     image: ghcr.io/platanosverdes/pixelhub:${PIXELHUB_VERSION}
     container_name: pixelhub
@@ -354,10 +376,14 @@ services:
     pids_limit: 64
     networks:
       - media-network
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      - pixelbridge
     environment:
       TZ: ${TZ:-Europe/Madrid}
+      PIXELHUB_BRIDGE: host.docker.internal:7777
       # Empty stops only this container at start, with a message, instead of failing the whole compose.
-      PIXELHUB_BRIDGE: ${PIXELHUB_BRIDGE:-}
       PIXELHUB_DEVICE_MAC: ${PIXELHUB_DEVICE_MAC:-}
     volumes:
       # state.json, uploaded pictures and sprites. Owned by uid 10001 before the first start:
