@@ -345,6 +345,8 @@ services:
   pixelbridge:
     image: ghcr.io/platanosverdes/pixelhub:${PIXELHUB_VERSION}
     container_name: pixelbridge
+    labels:
+      host.ports: "7777/tcp"
     restart: unless-stopped
     profiles: [display, all]
     network_mode: host
