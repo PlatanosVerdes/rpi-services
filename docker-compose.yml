@@ -342,6 +342,7 @@ services:
   # Bluetooth sockets only exist in the host's network namespace. It listens on docker0's address
   # only, so containers reach it and the LAN does not. The display is paired once on the host
   # (bluetoothctl pair + trust, with its PIN); the host's Bluetooth must not be rfkill-blocked.
+  # It runs as raspi to reach raspi's PipeWire, which plays the chime on the display's speaker.
   pixelbridge:
     image: ghcr.io/platanosverdes/pixelhub:${PIXELHUB_VERSION}
     container_name: pixelbridge
@@ -351,16 +352,23 @@ services:
     profiles: [display, all]
     network_mode: host
     entrypoint: ["pixelbridge", "-listen", "172.17.0.1:7777"]
-    mem_limit: 32m
-    memswap_limit: 32m
+    user: "1000:1000"
+    mem_limit: 64m
+    memswap_limit: 64m
     read_only: true
+    tmpfs:
+      - /tmp:size=4m
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
-    pids_limit: 16
+    pids_limit: 32
     healthcheck:
       disable: true
     environment:
       TZ: ${TZ:-Europe/Madrid}
+      XDG_RUNTIME_DIR: /run/user/1000
+    volumes:
+      # The parent, not raspi's own directory: that one only exists once raspi's session is up.
+      - /run/user:/run/user:ro
 
   # --- pixelhub: channels, scenes and alerts on the Divoom pixel display ---
   # It holds the one Bluetooth session to the display through pixelbridge, so nothing else may talk
@@ -385,6 +393,7 @@ services:
     environment:
       TZ: ${TZ:-Europe/Madrid}
       PIXELHUB_BRIDGE: host.docker.internal:7777
+      PIXELHUB_CHIME: "1"
       # Empty stops only this container at start, with a message, instead of failing the whole compose.
       PIXELHUB_DEVICE_MAC: ${PIXELHUB_DEVICE_MAC:-}
     volumes:
