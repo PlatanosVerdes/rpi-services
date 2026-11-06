@@ -378,9 +378,12 @@ services:
     container_name: pixelhub
     restart: unless-stopped
     profiles: [display, all]
-    mem_limit: 96m
-    memswap_limit: 96m
+    # ffmpeg decodes Mosko's recordings and voice effects next to the service.
+    mem_limit: 160m
+    memswap_limit: 160m
     read_only: true
+    tmpfs:
+      - /tmp:size=32m
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     pids_limit: 64
@@ -390,13 +393,34 @@ services:
       - host.docker.internal:host-gateway
     depends_on:
       - pixelbridge
+      - piper
     environment:
       TZ: ${TZ:-Europe/Madrid}
       PIXELHUB_BRIDGE: host.docker.internal:7777
       PIXELHUB_CHIME: "1"
+      PIXELHUB_SPEECH: piper:10200
       # Empty stops only this container at start, with a message, instead of failing the whole compose.
       PIXELHUB_DEVICE_MAC: ${PIXELHUB_DEVICE_MAC:-}
     volumes:
       # state.json, uploaded pictures and sprites. Owned by uid 10001 before the first start:
       # sudo install -d -o 10001 -g 10001 -m 700 appdata/pixelhub
       - ${APP_CONFIG_PATH}/pixelhub:/data
+
+  # --- piper: text-to-speech for Mosko, the face that talks on the pixel display ---
+  # Speaks the Wyoming protocol on 10200 inside media-network only. It downloads the voice into
+  # /data on the first start (about 60 MB).
+  piper:
+    image: rhasspy/wyoming-piper:2.5.2
+    container_name: piper
+    restart: unless-stopped
+    profiles: [display, all]
+    mem_limit: 384m
+    memswap_limit: 384m
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    networks:
+      - media-network
+    command: ["--voice", "es_ES-davefx-medium"]
+    volumes:
+      - ${APP_CONFIG_PATH}/piper:/data
