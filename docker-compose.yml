@@ -403,6 +403,9 @@ services:
       PIXELHUB_SPEECH: piper:10200
       # Empty stops only this container at start, with a message, instead of failing the whole compose.
       PIXELHUB_DEVICE_MAC: ${PIXELHUB_DEVICE_MAC:-}
+      PIXELHUB_PLUG_ID: ${PIXELHUB_PLUG_ID:-}
+      PIXELHUB_PLUG_IP: ${PIXELHUB_PLUG_IP:-}
+      PIXELHUB_PLUG_KEY: ${PIXELHUB_PLUG_KEY:-}
     volumes:
       # state.json, uploaded pictures and sprites. Owned by uid 10001 before the first start:
       # sudo install -d -o 10001 -g 10001 -m 700 appdata/pixelhub
