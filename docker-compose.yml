@@ -343,6 +343,8 @@ services:
   # only, so containers reach it and the LAN does not. The display is paired once on the host
   # (bluetoothctl pair + trust, with its PIN); the host's Bluetooth must not be rfkill-blocked.
   # It runs as raspi to reach raspi's PipeWire, which plays the chime on the display's speaker.
+  # -handsfree 3 is the Evo's hands-free channel, which reports its battery; WirePlumber has hfp_ag/hsp_ag
+  # off on the host (~/.config/wireplumber/wireplumber.conf.d/51-no-hfp-gateway.conf) so it does not take it.
   pixelbridge:
     image: ghcr.io/platanosverdes/pixelhub:${PIXELHUB_VERSION}
     container_name: pixelbridge
@@ -351,7 +353,7 @@ services:
     restart: unless-stopped
     profiles: [display, all]
     network_mode: host
-    entrypoint: ["pixelbridge", "-listen", "172.17.0.1:7777"]
+    entrypoint: ["pixelbridge", "-listen", "172.17.0.1:7777", "-handsfree", "3"]
     user: "1000:1000"
     mem_limit: 64m
     memswap_limit: 64m
