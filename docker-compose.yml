@@ -243,9 +243,9 @@ services:
       TORRE_COLLECT: PMI,BCN
       TORRE_SAMPLE: "200"
     volumes:
-      # The followed flights. The image runs as uid 10001, so the directory must be created owned by
-      # it before the first start: sudo install -d -o 10001 -g 10001 -m 700 appdata/torre
-      - ${APP_CONFIG_PATH}/torre:/data
+      # On the data disk, not the SD card: the board snapshots are rewritten every couple of minutes.
+      # Runs as uid 10001: sudo install -d -o 10001 -g 10001 -m 700 /mnt/data/db/torre
+      - ${DATA_DB_ROOT:-/mnt/data/db}/torre:/data
 
   # --- apex: motorcycle routes for Google Maps, with Google sign-in to keep them ---
   # Public, through the Cloudflare Tunnel (hostname apex.platanosverdes.com -> http://localhost:8780
