@@ -1,0 +1,2 @@
+# Data outside appdata that rpi-homeserver's nightly backup.sh must archive, one absolute path per line.
+/mnt/data/db/torre
