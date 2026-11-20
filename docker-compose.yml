@@ -415,7 +415,7 @@ services:
   # Speaks the Wyoming protocol on 10200 inside media-network only. It downloads the voice into
   # /data on the first start (about 60 MB).
   piper:
-    image: rhasspy/wyoming-piper:2.5.2
+    image: rhasspy/wyoming-piper:2.5.4
     container_name: piper
     restart: unless-stopped
     profiles: [display, all]
