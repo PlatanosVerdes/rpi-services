@@ -99,8 +99,10 @@ services:
       prometheus.probe.access: "https://fantasy.platanosverdes.com/"
     restart: unless-stopped
     profiles: [fantasy, all]
-    mem_limit: 320m
-    memswap_limit: 320m
+    # At 320m it hit the cap tens of thousands of times a week and the kernel evicted the binary's
+    # own pages, freezing every request for minutes. GOMEMLIMIT makes Go collect before that.
+    mem_limit: 512m
+    memswap_limit: 512m
     # Writes are on: nothing moves without confirming it in the page, and the standing
     # instructions only fire within the limits set there.
     command: ["serve", "--port", "8000", "--access-port", "8001", "--interval", "120", "--deep"]
@@ -110,6 +112,7 @@ services:
       TZ: ${TZ:-Europe/Madrid}
       # JSON on stdout: Vector already collects every container's logs.
       FANTASY_LOG_JSON: "1"
+      GOMEMLIMIT: 400MiB
       # futbolfantasy's ceilings only change with the nightly price adjustment: one read a day each.
       FANTASY_CEILING_TTL: 24h
       FANTASY_ACCESS_TEAM_DOMAIN: platanosverdes.cloudflareaccess.com
